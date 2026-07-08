@@ -214,7 +214,3 @@ PreCommitLens 当前实现的是轻量级 J-lens 复现：
 ## 许可证
 
 本项目采用 MIT 开源许可证。详情见 [LICENSE](LICENSE)。
-
-## 作者
-
-Created and maintained by Chen Xiwei.

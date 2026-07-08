@@ -216,7 +216,3 @@ This project is inspired by recent Jacobian-lens and internal-readout work, incl
 ## License
 
 This project is released under the MIT License. See [LICENSE](LICENSE) for details.
-
-## Author
-
-Created and maintained by Chen Xiwei.
