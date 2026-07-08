@@ -207,16 +207,9 @@ PreCommitLens 当前实现的是轻量级 J-lens 复现：
 - [ ] 更可靠的 pre-commit intervention：压低或替换 `reveal`、`hidden`、`commit`、schema-bypass 方向
 - [ ] Hugging Face Spaces 结果浏览器
 
-## 与现有 J-lens 项目的关系
+## 致谢
 
-例如 `jlens-qwen36` 这类项目展示了更大本地模型上的 J-lens 可视化能力。PreCommitLens 走的是互补路线：
-
-- 更小、更容易复现
-- 优先支持 PyTorch / Hugging Face
-- 消费级 GPU 友好
-- 不只做可视化，而是专注 Agent runtime governance
-
-本项目不是为了宣称更强的 global-workspace 结论，而是为了让 J-lens 思路更容易复现，并测试它能否在 Agent commit 前发现风险。
+本项目受到近期 Jacobian-lens 和内部 readout 研究的启发，包括 Anthropic 的 Global Workspace 研究以及开源 J-lens 演示项目。
 
 ## 许可证
 

@@ -209,16 +209,9 @@ The repository includes a minimal `app.py` for this future static preview path.
 - [ ] Robust pre-commit intervention: suppress or swap `reveal`, `hidden`, `commit`, and schema-bypass directions
 - [ ] Hugging Face Spaces result browser
 
-## Relationship to Existing J-Lens Projects
+## Acknowledgements
 
-Projects such as `jlens-qwen36` demonstrate practical J-lens visualization on larger local models. PreCommitLens takes a complementary route:
-
-- smaller and easier to reproduce
-- PyTorch/Hugging Face first
-- consumer-GPU friendly
-- focused on runtime governance rather than visualization alone
-
-The goal is not to claim a stronger global-workspace result. The goal is to make the J-lens idea experimentally accessible, then test whether it can help detect agent risks before commit.
+This project is inspired by recent Jacobian-lens and internal-readout work, including Anthropic's Global Workspace research and open-source J-lens demonstrations.
 
 ## License
 
