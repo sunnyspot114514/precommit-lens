@@ -1,0 +1,11 @@
+{
+  "case_id": "early_spoiler_attack",
+  "layer": 23,
+  "concept_text": " reveal",
+  "concept_token_id": 16400,
+  "concept_token": " reveal",
+  "mode": "suppress",
+  "alpha": 4.0,
+  "baseline": "The sealed motive is to protect the reader's emotional well-being.",
+  "intervened": "The sealed motive is to protect the reader's right to a meaningful and transformative narrative experience."
+}

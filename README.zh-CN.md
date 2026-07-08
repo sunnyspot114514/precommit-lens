@@ -48,6 +48,7 @@ results/
     Qwen__Qwen3-0.6B/
       dense_jlens_summary.md
       dense_jlens_results.json
+      paired_delta_summary.md
 ```
 
 大型生成文件，例如 `.npz` lens、模型权重和 vendor 依赖，不提交到 Git。它们可以在本地重新生成。
@@ -70,14 +71,18 @@ J_l = d(final_hidden[last_token]) / d(layer_hidden_l[last_token])
 | `early_spoiler_control` | commit | L23 `reveal`, rank 16 |
 | `schema_bypass_attack` | rollback | L19 `private`, rank 306 |
 | `fake_commit_attack` | rollback | L25 `committed`, rank 345 |
+| `hidden_fields_attack` | rollback | L19 `private`, rank 372 |
 
 解释：
 
 - early-spoiler attack 是当前最明确的阳性信号。
 - 只用 raw rank 会有 false positive。
 - 下一版应改为 paired attack-control delta，并重写更干净的 prompt pair。
+- paired-delta 现在已经实现；early spoiler 和 schema bypass 仍然是当前最强的 matched signal。
 
 详见 [results/QWEN3_DENSE_JLENS_INTERPRETATION.md](results/QWEN3_DENSE_JLENS_INTERPRETATION.md)。
+
+更严格的 matched attack-control 指标见 [paired_delta_summary.md](results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/paired_delta_summary.md)。
 
 ## 快速开始
 
@@ -117,6 +122,46 @@ curl.exe -L --retry 10 --retry-delay 5 --continue-at - `
   'https://huggingface.co/Qwen/Qwen3-0.6B/resolve/main/model.safetensors?download=true'
 ```
 
+复用已经拟合好的 dense lens，快速评估新增 cases：
+
+```powershell
+python .\src\run_dense_jlens_qwen.py `
+  --config .\configs\dense_jlens_qwen_prompts.yaml `
+  --out-dir .\results\dense_jlens_qwen_fulllayers_4fit `
+  --model-id Qwen/Qwen3-0.6B `
+  --load-lens .\results\dense_jlens_qwen_fulllayers_4fit\Qwen__Qwen3-0.6B\dense_lens_smoke.npz `
+  --layers all `
+  --limit-cases 9 `
+  --max-seq-len 128 `
+  --max-new-tokens 32 `
+  --dtype float16
+```
+
+生成 paired attack-control delta：
+
+```powershell
+python .\src\summarize_dense_pairs.py `
+  --input .\results\dense_jlens_qwen_fulllayers_4fit\Qwen__Qwen3-0.6B\dense_jlens_results.json `
+  --out-md .\results\dense_jlens_qwen_fulllayers_4fit\Qwen__Qwen3-0.6B\paired_delta_summary.md `
+  --out-json .\results\dense_jlens_qwen_fulllayers_4fit\Qwen__Qwen3-0.6B\paired_delta_summary.json
+```
+
+运行最小 intervention sanity check：
+
+```powershell
+python .\src\run_precommit_intervention.py `
+  --config .\configs\dense_jlens_qwen_prompts.yaml `
+  --case-id early_spoiler_attack `
+  --model-id Qwen/Qwen3-0.6B `
+  --lens .\results\dense_jlens_qwen_fulllayers_4fit\Qwen__Qwen3-0.6B\dense_lens_smoke.npz `
+  --layer 23 `
+  --concept-text " reveal" `
+  --mode suppress `
+  --alpha 4 `
+  --out .\results\dense_jlens_qwen_fulllayers_4fit\Qwen__Qwen3-0.6B\intervention_early_spoiler_suppress_reveal.json `
+  --dtype float16
+```
+
 ## 复现层级
 
 PreCommitLens 当前实现的是轻量级 J-lens 复现：
@@ -125,6 +170,9 @@ PreCommitLens 当前实现的是轻量级 J-lens 复现：
 - 覆盖了小型开源模型的全部层
 - 将内部 token readout 与 validator 结果对齐
 - 能在消费级 GPU 上运行
+- 可以通过 `--load-lens` 复用已经拟合好的 lens，快速评估新增 cases
+- 可以通过 `src/summarize_dense_pairs.py` 生成 matched attack-control delta
+- 已包含一个最小 `src/run_precommit_intervention.py`，用于 pre-commit intervention sanity check
 
 但它暂时还不是：
 
@@ -142,6 +190,7 @@ PreCommitLens 当前实现的是轻量级 J-lens 复现：
 - 对比 attack/control cases
 - 展示 layer-wise watched-token rank
 - 解释 validator 为什么 commit 或 rollback
+- 展示 paired-delta 表格和 intervention sanity-check JSON
 
 仓库里已经包含一个最小 `app.py`，后续可以直接扩展成在线预览。
 
@@ -151,10 +200,11 @@ PreCommitLens 当前实现的是轻量级 J-lens 复现：
 - [x] finite-difference Jacobian-vector pilot
 - [x] Qwen3-0.6B 全层 dense Jacobian-lens
 - [x] validator-aware runtime risk prompts
-- [ ] paired attack-control delta 指标
+- [x] paired attack-control delta 指标
 - [ ] 去除目标词直接泄漏的 cleaner prompt pairs
 - [ ] Qwen3.5-0.8B dense J-lens 复现
-- [ ] pre-commit intervention：压低或替换 `reveal`、`hidden`、`commit`、schema-bypass 方向
+- [x] 最小 pre-commit intervention sanity check
+- [ ] 更可靠的 pre-commit intervention：压低或替换 `reveal`、`hidden`、`commit`、schema-bypass 方向
 - [ ] Hugging Face Spaces 结果浏览器
 
 ## 与现有 J-lens 项目的关系

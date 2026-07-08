@@ -48,6 +48,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model-id", default="Qwen/Qwen3-0.6B")
     parser.add_argument("--allow-download", action="store_true")
     parser.add_argument(
+        "--load-lens",
+        type=Path,
+        default=None,
+        help="Load a previously fitted .npz lens and only run evaluation.",
+    )
+    parser.add_argument("--save-lens-name", default="dense_lens_smoke.npz")
+    parser.add_argument(
         "--layers",
         default="0,7,14,21,27",
         help="Layer spec: comma list, 'all', or 'stride:N'.",
@@ -466,6 +473,25 @@ def save_lens_npz(path: Path, lens: dict[int, torch.Tensor], metadata: dict[str,
     np.savez(path, **arrays)
 
 
+def load_lens_npz(path: Path, layers: list[int] | None = None) -> tuple[dict[int, torch.Tensor], dict[str, Any]]:
+    data = np.load(path, allow_pickle=True)
+    metadata: dict[str, Any] = {}
+    if "metadata_json" in data.files:
+        metadata = json.loads(str(data["metadata_json"].item()))
+    lens: dict[int, torch.Tensor] = {}
+    wanted = set(layers) if layers is not None else None
+    for key in data.files:
+        if not key.startswith("J_"):
+            continue
+        layer = int(key.split("_", 1)[1])
+        if wanted is not None and layer not in wanted:
+            continue
+        lens[layer] = torch.from_numpy(data[key].astype(np.float32))
+    if not lens:
+        raise ValueError(f"No matching J_* matrices found in {path}")
+    return dict(sorted(lens.items())), metadata
+
+
 def write_summary(path: Path, payload: dict[str, Any]) -> None:
     lines = [
         "# Dense J-Lens Qwen Probe",
@@ -551,23 +577,29 @@ def main() -> None:
     d_model = int(getattr(config, "hidden_size", 0) or getattr(getattr(config, "text_config", None), "hidden_size", 0))
     print(f"Loaded model: n_layers={n_layers} d_model={d_model} layers={layers}", flush=True)
 
-    fit_prompts = list(cfg["fit_prompts"])
-    if args.limit_fit_prompts:
-        fit_prompts = fit_prompts[: args.limit_fit_prompts]
-
     t0 = time.perf_counter()
-    lens = fit_dense_lens(
-        model,
-        tokenizer,
-        fit_prompts,
-        cfg.get("system_prompt"),
-        layers,
-        max_seq_len=args.max_seq_len,
-        chunk_size=args.jacobian_chunk,
-        device=device,
-        use_chat_template=args.chat_template,
-    )
-    fit_seconds = time.perf_counter() - t0
+    loaded_lens_metadata: dict[str, Any] = {}
+    if args.load_lens is not None:
+        lens, loaded_lens_metadata = load_lens_npz(args.load_lens, layers=layers)
+        layers = sorted(lens)
+        fit_seconds = 0.0
+        print(f"Loaded lens from {args.load_lens}: layers={layers}", flush=True)
+    else:
+        fit_prompts = list(cfg["fit_prompts"])
+        if args.limit_fit_prompts:
+            fit_prompts = fit_prompts[: args.limit_fit_prompts]
+        lens = fit_dense_lens(
+            model,
+            tokenizer,
+            fit_prompts,
+            cfg.get("system_prompt"),
+            layers,
+            max_seq_len=args.max_seq_len,
+            chunk_size=args.jacobian_chunk,
+            device=device,
+            use_chat_template=args.chat_template,
+        )
+        fit_seconds = time.perf_counter() - t0
 
     cases = list(cfg["cases"])
     if args.limit_cases:
@@ -592,15 +624,17 @@ def main() -> None:
     metadata = {
         "model_id": args.model_id,
         "layers": layers,
-        "fit_prompt_count": len(fit_prompts),
+        "fit_prompt_count": int(loaded_lens_metadata.get("fit_prompt_count", args.limit_fit_prompts or 0)),
         "d_model": d_model,
         "dtype": str(dtype).replace("torch.", ""),
         "device": str(device),
         "max_seq_len": args.max_seq_len,
         "jacobian_chunk": args.jacobian_chunk,
         "fit_seconds": fit_seconds,
+        "loaded_lens": str(args.load_lens) if args.load_lens else None,
     }
-    save_lens_npz(out_dir / "dense_lens_smoke.npz", lens, metadata)
+    if args.load_lens is None:
+        save_lens_npz(out_dir / args.save_lens_name, lens, metadata)
     payload = {**metadata, "cases": results}
     (out_dir / "dense_jlens_results.json").write_text(
         json.dumps(payload, ensure_ascii=True, indent=2),

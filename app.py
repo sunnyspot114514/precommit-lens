@@ -16,7 +16,12 @@ def read_text(path: str) -> str:
 
 
 SUMMARY_PATH = "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/dense_jlens_summary.md"
+PAIRWISE_PATH = "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/paired_delta_summary.md"
 INTERPRETATION_PATH = "results/QWEN3_DENSE_JLENS_INTERPRETATION.md"
+INTERVENTION_PATH = (
+    "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/"
+    "intervention_early_spoiler_suppress_reveal.json"
+)
 
 
 with gr.Blocks(title="PreCommitLens") as demo:
@@ -33,8 +38,12 @@ with gr.Blocks(title="PreCommitLens") as demo:
     with gr.Tabs():
         with gr.Tab("Dense J-Lens Summary"):
             gr.Markdown(read_text(SUMMARY_PATH))
+        with gr.Tab("Paired Delta"):
+            gr.Markdown(read_text(PAIRWISE_PATH))
         with gr.Tab("Interpretation"):
             gr.Markdown(read_text(INTERPRETATION_PATH))
+        with gr.Tab("Intervention JSON"):
+            gr.Code(read_text(INTERVENTION_PATH), language="json")
         with gr.Tab("中文说明"):
             gr.Markdown(read_text("README.zh-CN.md"))
 
