@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+
+.venv/
+.venv-*/
+.vendor-qwen/
+.env
+
+# Local model and lens artifacts
+*.npz
+*.safetensors
+*.bin
+*.gguf
+
+# Hugging Face / experiment caches
+.cache/
+data/lens/
+data/corpus/
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

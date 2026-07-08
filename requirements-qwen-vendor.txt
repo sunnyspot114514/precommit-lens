@@ -1,0 +1,6 @@
+# Installed into .vendor-qwen and used with the existing CUDA torch environment.
+# Do not install torch here; torch is supplied by ../muti-agent/.venv-mech312.
+transformers>=4.57.0
+safetensors
+pyyaml
+tqdm
