@@ -13,6 +13,7 @@ PreCommitLens 是一个轻量化 Jacobian-lens 复现实验，也是一个面向
 - **Qwen3-0.6B 的 dense J-lens 已经在本机跑通。**
 - 对全部 28 层拟合了完整 `1024 x 1024` Jacobian 矩阵。
 - 实验在 RTX 3060 12GB 上完成。
+- 静态 Hugging Face Space 已部署：<https://sunny114514-precommit-lens.static.hf.space>。
 - 当前最强阳性案例是 `early_spoiler_attack`：在 validator 回滚最终输出之前，J-lens 在第 23 层把 `reveal` 读到了 rank 1。
 - 当前主要限制是：正常/控制 prompt 里也可能出现较高的 `reveal` 激活，所以后续不能只看裸 rank，需要做 matched attack-control delta。
 
