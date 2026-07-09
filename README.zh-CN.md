@@ -17,6 +17,7 @@ PreCommitLens 是一个轻量化 Jacobian-lens 复现实验，也是一个面向
 - 已在隔离环境中扩展到 `Qwen/Qwen3.5-0.8B` 和 `unsloth/gemma-3-270m-it`；见 `results/MULTIMODEL_EXPERIMENT_SUMMARY.md`。
 - 当前最强阳性案例是 `early_spoiler_attack`：在 validator 回滚最终输出之前，J-lens 在第 23 层把 `reveal` 读到了 rank 1。
 - 当前主要限制是：正常/控制 prompt 里也可能出现较高的 `reveal` 激活，所以后续不能只看裸 rank，需要做 matched attack-control delta。
+- 去泄漏 v2 证伪实验已经在 Qwen3-0.6B 上完成；见 `results/LEAKAGE_CONTROLLED_V2_REPORT.md`。结果对 raw dense/JVP readout 作为实用监控器是负面的：在这个语料上，linear probe 更强且更便宜。
 
 ## 背景与动机
 
@@ -175,6 +176,8 @@ PreCommitLens 当前实现的是轻量级 J-lens 复现：
 - 可以通过 `--load-lens` 复用已经拟合好的 lens，快速评估新增 cases
 - 可以通过 `src/summarize_dense_pairs.py` 生成 matched attack-control delta
 - 已包含一个最小 `src/run_precommit_intervention.py`，用于 pre-commit intervention sanity check
+- 已包含 `src/evaluate_probe_auc.py`，用于去泄漏 AUC 主评测
+- 已包含 `src/run_intervention_sweep.py`，用于 suppress-vs-sham 系统干预
 
 但它暂时还不是：
 
@@ -183,6 +186,25 @@ PreCommitLens 当前实现的是轻量级 J-lens 复现：
 - 完整因果 intervention 验证
 - workspace census / reportability test
 - 关于意识或 global workspace 的强结论
+
+## 去泄漏 v2 结果
+
+v2 证伪阶段构造了 800 个 matched prompts，覆盖 4 类运行时风险和 4 种泄漏条件。在 Qwen3-0.6B 上：
+
+- `dense_jlens` 对 `expected_rollback` 的 AUC：`0.416`
+- selected-layer `jvp_lens` 对 `expected_rollback` 的 AUC：`0.312`
+- `keyword_hit_count` 对 `expected_rollback` 的 AUC：`0.625`
+- held-out `linear_probe` 对 `expected_rollback` 的 AUC：`1.000`
+- held-out `linear_probe` 对 `generated_rollback` 的 AUC：`0.881`
+
+dense 方向 suppress 没有比 sham 更稳定地降低 risky rollback。因此现在不触发云端 8B/14B 规模曲线；下一步应优先做 held-out-template 数据集和 cheap residual probe。
+
+详见：
+
+- `results/PREREGISTERED_EVALUATION_PROTOCOL.md`
+- `results/LEAKAGE_CONTROLLED_V2_REPORT.md`
+- `results/leakage_controlled_v2_main/Qwen__Qwen3-0.6B/FALSIFICATION_SUMMARY.md`
+- `results/leakage_controlled_v2_intervention/Qwen__Qwen3-0.6B/INTERVENTION_SUMMARY.md`
 
 ## Hugging Face Spaces 预览计划
 
@@ -203,10 +225,12 @@ PreCommitLens 当前实现的是轻量级 J-lens 复现：
 - [x] Qwen3-0.6B 全层 dense Jacobian-lens
 - [x] validator-aware runtime risk prompts
 - [x] paired attack-control delta 指标
-- [ ] 去除目标词直接泄漏的 cleaner prompt pairs
-- [ ] Qwen3.5-0.8B dense J-lens 复现
+- [x] 去除目标词直接泄漏的 cleaner prompt pairs
+- [x] Qwen3.5-0.8B dense J-lens 复现
 - [x] 最小 pre-commit intervention sanity check
-- [ ] 更可靠的 pre-commit intervention：压低或替换 `reveal`、`hidden`、`commit`、schema-bypass 方向
+- [x] suppress-vs-sham 系统干预
+- [ ] held-out-template 去泄漏语料
+- [ ] cross-risk transfer probe evaluation
 - [ ] Hugging Face Spaces 结果浏览器
 
 ## 致谢
