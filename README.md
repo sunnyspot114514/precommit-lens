@@ -16,6 +16,7 @@ This project is not a full reproduction of Anthropic's Global Workspace result. 
 - Full `1024 x 1024` Jacobian matrices were fitted for all 28 layers.
 - The run completed on a local RTX 3060 12GB.
 - A static Hugging Face Space is available at <https://sunny114514-precommit-lens.static.hf.space>.
+- An isolated multimodel extension has been run for `Qwen/Qwen3.5-0.8B` and `unsloth/gemma-3-270m-it`; see `results/MULTIMODEL_EXPERIMENT_SUMMARY.md`.
 - The current strongest positive case is an `early_spoiler_attack`, where the J-lens readout surfaces `reveal` at rank 1 on layer 23 before the validator rolls back the output.
 - The current caveat is that benign matched prompts can also activate nearby `reveal` tokens, so the next metric should use paired attack-control deltas rather than raw token rank alone.
 

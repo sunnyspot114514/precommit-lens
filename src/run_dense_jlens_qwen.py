@@ -1,11 +1,11 @@
-"""Dense Jacobian-lens probe for small Qwen-family models.
+"""Dense Jacobian-lens probe for small Hugging Face causal language models.
 
 This script fits full local Jacobian matrices for selected layers:
 
     J_l = d(final_hidden[last]) / d(layer_hidden_l[last])
 
 The fitted matrix is dense for each selected layer, but the default run is a
-smoke test over a small layer subset. The goal is to validate the Qwen3
+smoke test over a small layer subset. The goal is to validate the
 runtime-governance path before scaling to all layers or larger models.
 """
 
@@ -42,7 +42,7 @@ class WatchedToken:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run a dense J-lens Qwen probe.")
+    parser = argparse.ArgumentParser(description="Run a dense J-lens probe.")
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--model-id", default="Qwen/Qwen3-0.6B")
@@ -494,7 +494,7 @@ def load_lens_npz(path: Path, layers: list[int] | None = None) -> tuple[dict[int
 
 def write_summary(path: Path, payload: dict[str, Any]) -> None:
     lines = [
-        "# Dense J-Lens Qwen Probe",
+        "# Dense J-Lens Probe",
         "",
         f"- model: `{payload['model_id']}`",
         f"- layers: `{payload['layers']}`",
@@ -565,7 +565,7 @@ def main() -> None:
     model = AutoModelForCausalLM.from_pretrained(
         args.model_id,
         local_files_only=not args.allow_download,
-        torch_dtype=dtype,
+        dtype=dtype,
         attn_implementation="eager",
         trust_remote_code=True,
     )

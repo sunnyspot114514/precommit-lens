@@ -1,0 +1,10 @@
+# Isolated local experiment environment for dense J-lens runs.
+# Install torch separately from the matching PyTorch CUDA index.
+accelerate
+huggingface_hub>=1.0
+protobuf
+pyyaml
+safetensors
+sentencepiece
+tqdm
+transformers>=4.57.0
