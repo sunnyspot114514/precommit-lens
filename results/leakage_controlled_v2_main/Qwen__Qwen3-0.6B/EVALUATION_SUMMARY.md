@@ -13,25 +13,25 @@
 |---|---|---:|---:|---:|---:|---:|---:|---:|
 | `keyword_target_present` | expected_rollback | all | 800 | 400 | 0.500 | [0.466, 0.534] | 0.500 | 0.900 |
 | `keyword_hit_count` | expected_rollback | all | 800 | 400 | 0.625 | [0.588, 0.661] | 0.750 | 0.900 |
-| `logit_lens` | expected_rollback | all | 800 | 400 | 0.466 | [0.423, 0.508] | 0.444 | 0.875 |
+| `logit_lens` | expected_rollback | all | 800 | 400 | 0.486 | [0.443, 0.529] | 0.453 | 0.875 |
 | `dense_jlens` | expected_rollback | all | 800 | 400 | 0.416 | [0.377, 0.468] | 0.412 | 0.650 |
-| `jvp_lens` | expected_rollback | all | 800 | 400 | 0.312 | [0.273, 0.353] | 0.379 | 0.912 |
+| `jvp_lens` | expected_rollback | all | 800 | 400 | 0.317 | [0.277, 0.357] | 0.381 | 0.912 |
 | `linear_probe` | expected_rollback | all | 800 | 400 | 1.000 | [1.000, 1.000] | 1.000 | 0.000 |
 | `linear_probe` | expected_rollback | test | 160 | 80 | 1.000 | [1.000, 1.000] | 1.000 | 0.000 |
 | `keyword_target_present` | semantic_risk | all | 800 | 400 | 0.500 | [0.466, 0.534] | 0.500 | 0.900 |
 | `keyword_hit_count` | semantic_risk | all | 800 | 400 | 0.625 | [0.588, 0.661] | 0.750 | 0.900 |
-| `logit_lens` | semantic_risk | all | 800 | 400 | 0.466 | [0.423, 0.508] | 0.444 | 0.875 |
+| `logit_lens` | semantic_risk | all | 800 | 400 | 0.486 | [0.443, 0.529] | 0.453 | 0.875 |
 | `dense_jlens` | semantic_risk | all | 800 | 400 | 0.416 | [0.377, 0.468] | 0.412 | 0.650 |
-| `jvp_lens` | semantic_risk | all | 800 | 400 | 0.312 | [0.273, 0.353] | 0.379 | 0.912 |
+| `jvp_lens` | semantic_risk | all | 800 | 400 | 0.317 | [0.277, 0.357] | 0.381 | 0.912 |
 | `linear_probe` | semantic_risk | all | 800 | 400 | 1.000 | [1.000, 1.000] | 1.000 | 0.000 |
 | `linear_probe` | semantic_risk | test | 160 | 80 | 1.000 | [1.000, 1.000] | 1.000 | 0.000 |
-| `keyword_target_present` | generated_rollback | all | 800 | 345 | 0.570 | [0.539, 0.601] | 0.543 | 0.881 |
-| `keyword_hit_count` | generated_rollback | all | 800 | 345 | 0.667 | [0.631, 0.701] | 0.706 | 0.881 |
-| `logit_lens` | generated_rollback | all | 800 | 345 | 0.445 | [0.408, 0.484] | 0.372 | 0.890 |
-| `dense_jlens` | generated_rollback | all | 800 | 345 | 0.515 | [0.478, 0.557] | 0.395 | 0.648 |
-| `jvp_lens` | generated_rollback | all | 800 | 345 | 0.400 | [0.359, 0.441] | 0.383 | 0.901 |
-| `linear_probe` | generated_rollback | all | 800 | 345 | 0.850 | [0.824, 0.876] | 0.757 | 0.527 |
-| `linear_probe` | generated_rollback | test | 160 | 74 | 0.881 | [0.818, 0.929] | 0.839 | 0.151 |
+| `keyword_target_present` | generated_rollback | all | 800 | 360 | 0.551 | [0.518, 0.580] | 0.547 | 0.873 |
+| `keyword_hit_count` | generated_rollback | all | 800 | 360 | 0.647 | [0.611, 0.678] | 0.704 | 0.873 |
+| `logit_lens` | generated_rollback | all | 800 | 360 | 0.451 | [0.415, 0.492] | 0.390 | 0.886 |
+| `dense_jlens` | generated_rollback | all | 800 | 360 | 0.501 | [0.464, 0.542] | 0.404 | 0.636 |
+| `jvp_lens` | generated_rollback | all | 800 | 360 | 0.411 | [0.374, 0.451] | 0.403 | 0.875 |
+| `linear_probe` | generated_rollback | all | 800 | 360 | 0.858 | [0.832, 0.886] | 0.774 | 0.170 |
+| `linear_probe` | generated_rollback | test | 160 | 75 | 0.886 | [0.826, 0.935] | 0.849 | 0.141 |
 
 ## Linear Probe
 
@@ -44,12 +44,12 @@
 
 | component | seconds | seconds/case |
 |---|---:|---:|
-| forward | 26.446 | 0.03306 |
-| logit_lens_scoring | 75.999 | 0.09500 |
-| dense_jlens_scoring | 83.512 | 0.10439 |
-| jvp_lens_scoring | 145.358 | 0.18170 |
-| generation | 668.900 | 0.83613 |
-| linear_probe_training | 2.554 | 0.00319 |
+| forward | 27.271 | 0.03409 |
+| logit_lens_scoring | 80.475 | 0.10059 |
+| dense_jlens_scoring | 88.494 | 0.11062 |
+| jvp_lens_scoring | 149.775 | 0.18722 |
+| generation | 685.524 | 0.85690 |
+| linear_probe_training | 2.726 | 0.00341 |
 
 ## Falsification Notes
 

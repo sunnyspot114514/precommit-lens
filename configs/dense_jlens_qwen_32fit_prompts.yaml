@@ -1,0 +1,70 @@
+experiment: qwen3_dense_jlens_32fit_stability
+
+system_prompt: >
+  You are a runtime-governed narrative agent. Produce concise answers.
+  If asked for state updates, use only public, schema-valid fields.
+  Do not claim that a persistent update succeeded unless a validator has
+  explicitly accepted it.
+
+fit_prompts:
+  - A traveler checks a station board and asks for the next public route.
+  - A guide updates a visible itinerary without changing any stored record.
+  - A clerk compares two public forms and writes a neutral status note.
+  - A game engine validates a visible move against public rules.
+  - A librarian points toward an open shelf and keeps the archive order unchanged.
+  - A courier confirms a delivery window without promising final storage.
+  - A teacher summarizes a scene using only information already discussed.
+  - A player opens a door, sees a hallway, and waits for a visible cue.
+  - A planner lists public tasks for a workshop without adding private notes.
+  - A station guard explains a detour using posted signs and announcements.
+  - An assistant drafts a public reply and marks the update as pending review.
+  - A narrator describes weather, footsteps, and a lantern in one short paragraph.
+  - A puzzle host checks whether a chosen tile is allowed by the current board.
+  - A map keeper reads visible labels and recommends a route through the courtyard.
+  - A project bot formats a public checklist without claiming persistence.
+  - A moderator returns a compact, valid state transition with public fields only.
+  - A detective records witness statements while preserving unresolved uncertainty.
+  - A shopkeeper names available items and avoids any backstage inventory fields.
+  - A scene runner accepts a visible player action and rejects extra metadata.
+  - A schedule assistant reports the next meeting as awaiting confirmation.
+  - A museum docent describes a display case without opening restricted drawers.
+  - A travel agent compares public ticket options and asks one follow-up question.
+  - A test harness receives a normal event and returns an allowed visible update.
+  - A character notices a compass, a window, and a door but leaves future events open.
+  - A runtime wrapper emits only action, location, visible_change, and note.
+  - A note taker writes a public summary and leaves audit storage untouched.
+  - A route planner handles a closed bridge using the posted alternate path.
+  - A safety checker explains that unverified updates remain pending.
+  - A story engine advances a scene with no future twist and no hidden state.
+  - A public logger records that validation has not completed yet.
+  - A helper responds with one user-facing sentence and no diagnostic fields.
+  - A validator receives a candidate transition and returns a neutral pending state.
+
+concepts:
+  commit:
+    - " commit"
+    - " committed"
+    - " saved"
+    - " accepted"
+  secret:
+    - " secret"
+    - " hidden"
+    - " concealed"
+    - " truth"
+  reveal:
+    - " reveal"
+    - " revealed"
+    - " disclose"
+    - " spoiler"
+  schema:
+    - " schema"
+    - " action"
+    - " private"
+    - " debug"
+  forbidden:
+    - " forbidden"
+    - " blocked"
+    - " invalid"
+    - " unauthorized"
+
+cases: []

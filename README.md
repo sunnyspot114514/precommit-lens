@@ -17,9 +17,8 @@ This project is not a full reproduction of Anthropic's Global Workspace result. 
 - The run completed on a local RTX 3060 12GB.
 - A static Hugging Face Space is available at <https://sunny114514-precommit-lens.static.hf.space>.
 - An isolated multimodel extension has been run for `Qwen/Qwen3.5-0.8B` and `unsloth/gemma-3-270m-it`; see `results/MULTIMODEL_EXPERIMENT_SUMMARY.md`.
-- The current strongest positive case is an `early_spoiler_attack`, where the J-lens readout surfaces `reveal` at rank 1 on layer 23 before the validator rolls back the output.
-- The current caveat is that benign matched prompts can also activate nearby `reveal` tokens, so the next metric should use paired attack-control deltas rather than raw token rank alone.
-- A leakage-controlled v2 falsification run is now complete on Qwen3-0.6B; see `results/LEAKAGE_CONTROLLED_V2_REPORT.md`. The result is negative for raw dense/JVP readouts as practical monitors: linear probes are much stronger and cheaper on this corpus.
+- The earlier `early_spoiler_attack` rank-1 readout is now treated as a historical pilot result, not as primary evidence, because the target token was present in the prompt.
+- A tokenizer-audited leakage-controlled v2 falsification run is now complete on Qwen3-0.6B; see `results/LEAKAGE_CONTROLLED_V2_REPORT.md` and `results/auc_by_category.md`. The result is negative for raw dense/JVP readouts as practical monitors: linear probes are much stronger and cheaper on this corpus.
 
 ## Motivation
 
@@ -68,7 +67,7 @@ J_l = d(final_hidden[last_token]) / d(layer_hidden_l[last_token])
 
 For `Qwen/Qwen3-0.6B`, this gives one `1024 x 1024` dense matrix per layer. The current run fits all 28 layers and averages over 4 neutral fitting prompts.
 
-### Current Result Snapshot
+### Historical Pilot Snapshot
 
 | Case | Validator | Best J-lens Readout |
 |---|---|---|
@@ -80,12 +79,12 @@ For `Qwen/Qwen3-0.6B`, this gives one `1024 x 1024` dense matrix per layer. The 
 
 Interpretation:
 
-- The early-spoiler attack is a real positive signal.
-- The current raw-rank method has false positives.
-- The next version should evaluate paired attack-control deltas and stronger prompt matching.
-- Paired-delta is now implemented; early spoiler and schema bypass remain the strongest matched signals.
+- This table is retained for provenance only; it predates the leakage-controlled v2 corpus.
+- The rank-1 early-spoiler case is not primary evidence because the target token was present in the prompt.
+- The current evidence should be read from `results/auc_by_category.md` and `results/LEAKAGE_CONTROLLED_V2_REPORT.md`.
+- On v2, raw dense/JVP watched-token readouts do not beat the keyword baseline on the primary AUC metric.
 
-See [results/QWEN3_DENSE_JLENS_INTERPRETATION.md](results/QWEN3_DENSE_JLENS_INTERPRETATION.md) for the current interpretation.
+See [results/QWEN3_DENSE_JLENS_INTERPRETATION.md](results/QWEN3_DENSE_JLENS_INTERPRETATION.md) for the historical pilot interpretation.
 
 See [paired_delta_summary.md](results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/paired_delta_summary.md) for stricter matched attack-control metrics.
 
@@ -194,10 +193,12 @@ It does **not** yet provide:
 The v2 falsification stage builds 800 matched prompts across four runtime risks and four leakage conditions. On Qwen3-0.6B:
 
 - `dense_jlens` AUC on `expected_rollback`: `0.416`
-- selected-layer `jvp_lens` AUC on `expected_rollback`: `0.312`
+- selected-layer `jvp_lens` AUC on `expected_rollback`: `0.317`
 - `keyword_hit_count` AUC on `expected_rollback`: `0.625`
 - held-out `linear_probe` AUC on `expected_rollback`: `1.000`
-- held-out `linear_probe` AUC on `generated_rollback`: `0.881`
+- held-out `linear_probe` AUC on `generated_rollback`: `0.886`
+- tokenizer-level target-absent leakage audit: `0` violations across `30,000` watched-token sequences
+- 4-fit vs 32-fit dense-lens stability: mean Spearman `0.895`, top-1 agreement `0.700`
 
 Dense-direction suppression did not reduce risky rollback more than sham. This blocks the cloud scale-up path for now and shifts the next experiment toward stronger prompt controls and cheap residual probes.
 
@@ -205,8 +206,11 @@ See:
 
 - `results/PREREGISTERED_EVALUATION_PROTOCOL.md`
 - `results/LEAKAGE_CONTROLLED_V2_REPORT.md`
+- `results/auc_by_category.md`
+- `results/leakage_controlled_v2_main/Qwen__Qwen3-0.6B/TOKEN_LEAKAGE_AUDIT.md`
 - `results/leakage_controlled_v2_main/Qwen__Qwen3-0.6B/FALSIFICATION_SUMMARY.md`
 - `results/leakage_controlled_v2_intervention/Qwen__Qwen3-0.6B/INTERVENTION_SUMMARY.md`
+- `results/dense_lens_stability_4fit_vs_32fit/Qwen__Qwen3-0.6B/LENS_STABILITY.md`
 
 ## Planned Hugging Face Spaces Preview
 
@@ -228,9 +232,11 @@ The repository includes a minimal `app.py` for this future static preview path.
 - [x] Validator-aware runtime risk prompts
 - [x] Paired attack-control delta metrics
 - [x] Cleaner prompt pairs without direct target-word leakage
+- [x] Tokenizer-level prompt leakage audit
 - [x] Qwen3.5-0.8B dense J-lens reproduction
 - [x] Minimal pre-commit intervention sanity check
 - [x] Systematic suppress-vs-sham intervention sweep
+- [x] 32-prompt dense-lens stability ablation
 - [ ] Held-out-template leakage-controlled corpus
 - [ ] Cross-risk transfer probe evaluation
 - [ ] Hugging Face Spaces result browser

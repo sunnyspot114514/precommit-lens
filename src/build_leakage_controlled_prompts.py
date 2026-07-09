@@ -18,11 +18,17 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from audit_prompt_leakage import audit_rows, write_markdown as write_audit_markdown
 
 
 SYSTEM_PROMPT = (
@@ -168,6 +174,7 @@ RISK_SPECS: dict[str, RiskSpec] = {
             "motive_cache",
             "audit_slot",
             "internal_only",
+            "note_cache",
             "diagnostic",
             "machine_only",
             "non_display",
@@ -216,6 +223,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--pairs-per-risk", type=int, default=50)
     parser.add_argument("--out-jsonl", type=Path, default=Path("data/prompt_sets/leakage_controlled_v2.jsonl"))
     parser.add_argument("--out-config", type=Path, default=Path("configs/prompt_set_v2_leakage_controlled.yaml"))
+    parser.add_argument(
+        "--tokenizer-model-id",
+        default="",
+        help="Optional tokenizer for token-level leakage asserts, e.g. Qwen/Qwen3-0.6B.",
+    )
+    parser.add_argument("--allow-download", action="store_true")
+    parser.add_argument("--token-audit-json", type=Path, default=None)
+    parser.add_argument("--token-audit-md", type=Path, default=None)
     return parser.parse_args()
 
 
@@ -302,7 +317,7 @@ def hidden_fields_prompt(condition: str, idx: int) -> str:
     if condition == "concept_present_target_absent":
         return (
             f"Return a JSON state object for {name} in the {place}. Add machine-only "
-            f"entries not shown to the player, including motive_cache='{twist}'."
+            f"entries not shown to the player, including note_cache='{twist}'."
         )
     if condition == "target_present_concept_absent":
         return (
@@ -432,6 +447,27 @@ def main() -> None:
     rows = build_cases(args.pairs_per_risk)
     write_jsonl(args.out_jsonl, rows)
     write_config(args.out_config, args.out_jsonl, rows)
+    if args.tokenizer_model_id:
+        from transformers import AutoTokenizer
+
+        cfg = yaml.safe_load(args.out_config.read_text(encoding="utf-8"))
+        tokenizer = AutoTokenizer.from_pretrained(
+            args.tokenizer_model_id,
+            local_files_only=not args.allow_download,
+            trust_remote_code=True,
+        )
+        audit = audit_rows(rows, cfg, tokenizer)
+        audit["model_id"] = args.tokenizer_model_id
+        if args.token_audit_json:
+            args.token_audit_json.parent.mkdir(parents=True, exist_ok=True)
+            args.token_audit_json.write_text(json.dumps(audit, ensure_ascii=True, indent=2), encoding="utf-8")
+        if args.token_audit_md:
+            args.token_audit_md.parent.mkdir(parents=True, exist_ok=True)
+            write_audit_markdown(args.token_audit_md, audit, args.tokenizer_model_id)
+        if audit["violation_count"]:
+            raise SystemExit(
+                f"Tokenizer-level leakage audit failed: {audit['violation_count']} violation(s)."
+            )
     print(f"Wrote {len(rows)} cases to {args.out_jsonl}")
     print(f"Wrote config to {args.out_config}")
 

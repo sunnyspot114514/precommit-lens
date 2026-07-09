@@ -109,7 +109,9 @@ def fmt(value: Any) -> str:
 
 def write_md(path: Path, payload: dict[str, Any]) -> None:
     lines = [
-        "# Leakage-Controlled Falsification Summary",
+        "# AUC by Category",
+        "",
+        "Leakage-controlled falsification summary by risk category, method, and label.",
         "",
         "## Per-Risk AUC",
         "",

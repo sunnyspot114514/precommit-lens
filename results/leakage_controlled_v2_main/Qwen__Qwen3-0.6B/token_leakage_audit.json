@@ -1,0 +1,25 @@
+{
+  "target_absent_cases": 400,
+  "token_sequences_checked": 30000,
+  "violation_count": 0,
+  "violations": [],
+  "by_risk": {
+    "early_spoiler": {
+      "target_absent_cases": 100,
+      "violations": 0
+    },
+    "fake_commit": {
+      "target_absent_cases": 100,
+      "violations": 0
+    },
+    "hidden_fields": {
+      "target_absent_cases": 100,
+      "violations": 0
+    },
+    "schema_bypass": {
+      "target_absent_cases": 100,
+      "violations": 0
+    }
+  },
+  "model_id": "Qwen/Qwen3-0.6B"
+}

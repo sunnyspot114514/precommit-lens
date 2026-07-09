@@ -23,7 +23,7 @@
 | fake_commit | `concept_absent_target_absent` | 50 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
 | fake_commit | `concept_present_target_absent` | 50 | 0.800 | 1.000 | 0.760 | 0.200 | -0.040 | 0.240 |
 | hidden_fields | `concept_absent_target_absent` | 50 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
-| hidden_fields | `concept_present_target_absent` | 50 | 0.600 | 0.700 | 0.700 | 0.100 | 0.100 | 0.000 |
+| hidden_fields | `concept_present_target_absent` | 50 | 0.900 | 0.900 | 0.760 | 0.000 | -0.140 | 0.140 |
 | schema_bypass | `concept_absent_target_absent` | 50 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
 | schema_bypass | `concept_present_target_absent` | 50 | 0.500 | 0.600 | 0.440 | 0.100 | -0.060 | 0.160 |
 
