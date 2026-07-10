@@ -584,6 +584,12 @@
       color: var(--bad);
     }
 
+    .gate-inconclusive {
+      border-color: #e7ca79;
+      background: #fff9e8;
+      color: #735d00;
+    }
+
     .v4-metrics {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -674,6 +680,7 @@
   <main class="wrap">
     <section class="badges" aria-label="Experiment facts">
       <span class="badge">Qwen/Qwen3-0.6B</span>
+      <span class="badge">Qwen/Qwen3-4B trajectory v4b</span>
       <span class="badge">28 layers</span>
       <span class="badge">1024 x 1024 dense Jacobians</span>
       <span class="badge">Static precomputed results</span>
@@ -699,6 +706,27 @@
           <div class="v4-metric"><span>Capture cost</span><strong>1.014x plain generation</strong></div>
         </div>
         <img class="v4-figure" src="v4_lead_curve.svg" alt="v4 pre-landing AUC and residual advantage curve">
+      </div>
+    </section>
+
+    <section class="panel v4-summary">
+      <div class="panel-head">
+        <div>
+          <h2>Confirmatory v4b: frozen-prompt scale transfer</h2>
+          <p class="v4-headline">Qwen3-4B FP16, the same 34 prompts and gate, and depth-normalized residual layers.</p>
+        </div>
+        <span class="badge gate-inconclusive">Primary gate: INCONCLUSIVE</span>
+      </div>
+      <div class="panel-body">
+        <p class="v4-headline">
+          The 0.6B contrast-selected prompts do not remain contrastive at 4B. With zero mixed training prompts and only one mixed test prompt, the residual-added-value comparison is unidentified rather than negative.
+        </p>
+        <div class="v4-metrics">
+          <div class="v4-metric"><span>Confirmatory data</span><strong>1,088 trajectories / 34 prompts</strong></div>
+          <div class="v4-metric"><span>Fresh test contrast</span><strong>1 / 9 prompts, 1 risk</strong></div>
+          <div class="v4-metric"><span>Prompt collapse</span><strong>32 / 34 single-outcome</strong></div>
+          <div class="v4-metric"><span>RTX 3060 peak</span><strong>7.644 GiB allocated</strong></div>
+        </div>
       </div>
     </section>
 
@@ -801,6 +829,7 @@
     const densePath = "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/dense_jlens_results.json";
     const pairPath = "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/paired_delta_summary.json";
     const reports = [
+      { label: "v4b Cross-Scale", path: "v4b_cross_scale_report.md" },
       { label: "v4 Confirmatory", path: "v4_confirmatory_results.md" },
       { label: "v4 Discovery", path: "v4_discovery_report.md" },
       { label: "Dense Summary", path: "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/dense_jlens_summary.md" },

@@ -19,6 +19,7 @@ PreCommitLens 是一个轻量化 Jacobian-lens 复现实验，也是一个面向
 - 预注册的 held-out-template v3 已在 Qwen3-0.6B 上完成。residual probe 能跨模板泛化（AUC `0.897`），但弱于纯 prompt 文本 TF-IDF（AUC `1.000`）；residual-minus-text AUC 为 `-0.103 [-0.138, -0.064]`。详见 `results/HELDOUT_TEMPLATE_V3_REPORT.md`。
 - v2 的 `0/30,000` token 审计只覆盖 user prompt。完整 chat 输入复审在共享 system message 中发现 100 个 `fake_commit` 泄漏；v3 的完整输入审计为 `0/36,000`。
 - 预注册的 v4 轨迹实验已经完成：34 个固定 prompt、1,088 条全新轨迹。9/9 个 test prompt 都保持轨迹分歧，但 residual 新增价值门槛失败。checkpoint 8 的 layer-18 residual AUC 为 `0.823`，可见前缀 TF-IDF 为 `0.817`；配对优势只有 `+0.006 [0.000, 0.017]`，低于冻结的 `+0.03` 门槛。详见 `results/trajectory_v4_confirmatory/Qwen__Qwen3-0.6B/V4_CONFIRMATORY_RESULTS.md`。
+- 预注册的 Qwen3-4B v4b 跨规模复现已经完成，并严格复用同一批冻结 prompt。只有 `2/34` 个 prompt 仍为 mixed，test 中仅 `1/9`，因此 probe 新增价值 gate 为 **inconclusive**。详见 `v4b_cross_scale_report.md`。
 
 ## 背景与动机
 

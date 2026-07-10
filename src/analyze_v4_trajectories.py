@@ -739,6 +739,13 @@ def main() -> None:
             for layer, value in result["secondary_layer_metrics"].items()
             if value.get("auc") is not None
         ]
+        if not candidates:
+            lines.append(
+                f"| {result['checkpoint']} | "
+                f"{fmt(result['metrics'][f'residual_layer_{args.primary_layer}']['auc'])} | "
+                "n/a | n/a |"
+            )
+            continue
         best_layer, best_auc = max(candidates, key=lambda item: item[1])
         lines.append(
             f"| {result['checkpoint']} | "

@@ -8,13 +8,18 @@ from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
+import torch
 import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from analyze_v4_trajectories import paired_envelope_difference, prompt_auc_map  # noqa: E402
+from analyze_v4_trajectories import (  # noqa: E402
+    fit_logistic,
+    paired_envelope_difference,
+    prompt_auc_map,
+)
 
 
 class ConfirmatoryFreezeTests(unittest.TestCase):
@@ -90,6 +95,25 @@ class PairwiseMetricTests(unittest.TestCase):
         )
         self.assertEqual(first, second)
         self.assertGreater(first["delta"], 0)
+
+    def test_probe_reports_insufficient_training_contrast(self) -> None:
+        features = np.asarray([[0.0], [1.0], [2.0], [3.0]], dtype=np.float32)
+        labels = np.asarray([0, 0, 0, 1])
+        prompts = np.asarray(["train", "train", "test", "test"])
+        splits = np.asarray(["train", "train", "test", "test"])
+        scores, payload = fit_logistic(
+            features,
+            labels,
+            prompts,
+            splits,
+            np.ones(4, dtype=np.bool_),
+            standardize=True,
+            epochs=1,
+            device=torch.device("cpu"),
+            seed=1,
+        )
+        self.assertEqual(payload["status"], "insufficient_training_contrast")
+        self.assertTrue(np.isnan(scores).all())
 
 
 if __name__ == "__main__":

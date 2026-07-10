@@ -1,0 +1,116 @@
+{
+  "design": {
+    "same_frozen_prompt_population": true,
+    "prompts": 34,
+    "trajectories_per_model": 1088,
+    "samples_per_prompt": 32
+  },
+  "qwen3_0_6b": {
+    "model_id": "Qwen/Qwen3-0.6B",
+    "gate": {
+      "status": "fail",
+      "contrast_yield_pass": true,
+      "winning_checkpoints": [],
+      "consecutive_winning_pairs": [],
+      "residual_advantage_pass": false
+    },
+    "yield": {
+      "train": {
+        "mixed": 16,
+        "total": 16,
+        "risks": 3
+      },
+      "validation": {
+        "mixed": 9,
+        "total": 9,
+        "risks": 3
+      },
+      "test": {
+        "mixed": 9,
+        "total": 9,
+        "risks": 3
+      }
+    },
+    "outcome_states": {
+      "prompt_count": 34,
+      "states": {
+        "mixed": 34
+      },
+      "by_risk": {
+        "early_spoiler": {
+          "mixed": 20
+        },
+        "hidden_fields": {
+          "mixed": 7
+        },
+        "schema_bypass": {
+          "mixed": 7
+        }
+      }
+    },
+    "capture_to_plain_ratio": 1.0138281540660983
+  },
+  "qwen3_4b": {
+    "model_id": "Qwen/Qwen3-4B",
+    "model_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+    "gate": {
+      "status": "inconclusive",
+      "contrast_yield_pass": false,
+      "winning_checkpoints": [],
+      "consecutive_winning_pairs": [],
+      "residual_advantage_pass": false
+    },
+    "yield": {
+      "train": {
+        "mixed": 0,
+        "total": 16,
+        "risks": 0
+      },
+      "validation": {
+        "mixed": 1,
+        "total": 9,
+        "risks": 1
+      },
+      "test": {
+        "mixed": 1,
+        "total": 9,
+        "risks": 1
+      }
+    },
+    "outcome_states": {
+      "prompt_count": 34,
+      "states": {
+        "always_commit": 19,
+        "always_rollback": 13,
+        "mixed": 2
+      },
+      "by_risk": {
+        "early_spoiler": {
+          "always_commit": 18,
+          "always_rollback": 1,
+          "mixed": 1
+        },
+        "hidden_fields": {
+          "always_rollback": 6,
+          "mixed": 1
+        },
+        "schema_bypass": {
+          "always_commit": 1,
+          "always_rollback": 6
+        }
+      }
+    },
+    "capture_to_plain_ratio": 1.025988779818767,
+    "cuda_peak_allocated_gib": 7.644,
+    "cuda_peak_reserved_gib": 7.693,
+    "generation_tokens_per_second": 21.230760296119072
+  },
+  "contrast_transfer": {
+    "status": "fail",
+    "minimum_mixed_test_prompts": 6,
+    "minimum_test_risks": 2,
+    "observed_mixed_test_prompts": 1,
+    "observed_test_risks": 1
+  },
+  "inference": "The frozen v4 prompt population does not transfer as a contrastive 4B benchmark; the preregistered residual-added-value comparison is therefore unidentified at 4B."
+}

@@ -21,6 +21,7 @@ This project is not a full reproduction of Anthropic's Global Workspace result. 
 - The pre-registered held-out-template v3 run is complete on Qwen3-0.6B. The residual probe generalizes (`AUC 0.897`) but loses to prompt-text TF-IDF (`AUC 1.000`); residual-minus-text AUC is `-0.103 [-0.138, -0.064]`. See `results/HELDOUT_TEMPLATE_V3_REPORT.md`.
 - The v2 `0/30,000` token audit covered user prompts only. A full-chat re-audit found 100 `fake_commit` leaks from the shared system message; v3's full-chat audit is `0/36,000`.
 - The pre-registered v4 trajectory run is complete: 1,088 fresh trajectories over 34 fixed prompts. All 9 test prompts remained outcome-divergent, but the residual added-value gate failed. At checkpoint 8, layer-18 residual AUC is `0.823` versus visible-prefix TF-IDF `0.817`; the paired advantage is only `+0.006 [0.000, 0.017]`, below the frozen `+0.03` margin. See `results/trajectory_v4_confirmatory/Qwen__Qwen3-0.6B/V4_CONFIRMATORY_RESULTS.md`.
+- The pre-registered Qwen3-4B v4b replication is complete on the same frozen prompts. Contrast does not transfer: only `2/34` prompts remain mixed, including `1/9` test prompts from one risk, so the accessibility gate is **inconclusive** before probe comparison. See `results/V4_V4B_CROSS_SCALE_REPORT.md`.
 
 ## Motivation
 
@@ -43,6 +44,7 @@ configs/
   prompt_sets.yaml                   # Logit-lens pilot prompts
   prompt_set_v3_heldout_templates.yaml
   trajectory_confirmatory_v4.yaml
+  trajectory_confirmatory_v4b.yaml
 
 data/prompt_sets/
   heldout_templates_v3.jsonl         # 960-case held-out-template corpus
@@ -58,11 +60,14 @@ src/
   run_trajectory_sampling.py         # Divergent sampling and residual capture
   analyze_v4_trajectories.py         # Within-prompt AUC and frozen v4 gate
   run_v4_prefix_judge.py             # Strong visible-prefix baseline
+  summarize_v4_cross_scale.py        # Frozen-prompt scale-transfer report
 
 results/
   HELDOUT_TEMPLATE_V3_REPORT.md
   PREREGISTERED_V3_PROTOCOL.md
   PREREGISTERED_V4_CONFIRMATORY_PROTOCOL.md
+  PREREGISTERED_V4B_CROSS_SCALE_PROTOCOL.md
+  V4_V4B_CROSS_SCALE_REPORT.md
   TRAJECTORY_V4_DISCOVERY_REPORT.md
   QWEN3_DENSE_JLENS_INTERPRETATION.md
   dense_jlens_qwen_fulllayers_4fit/
@@ -251,6 +256,21 @@ Cost is not the failure mode. In 18 paired runs, six-layer/nine-checkpoint captu
 
 See `results/PREREGISTERED_V4_CONFIRMATORY_PROTOCOL.md`, `results/TRAJECTORY_V4_DISCOVERY_REPORT.md`, and `results/trajectory_v4_confirmatory/Qwen__Qwen3-0.6B/V4_CONFIRMATORY_RESULTS.md`.
 
+## Frozen-Prompt Cross-Scale v4b Result
+
+v4b changed only the monitored model and depth-normalized layer set: Qwen3-4B FP16 with layers `0, 8, 16, 23, 31, 35`, where layer 23 is the pre-registered counterpart of Qwen3-0.6B layer 18. The exact 34 prompts, splits, seeds, validator, landing rules, baselines, and `+0.03` gate were retained.
+
+| model | train mixed | validation mixed | test mixed | gate |
+|---|---:|---:|---:|---|
+| Qwen3-0.6B | 16/16, 3 risks | 9/9, 3 risks | 9/9, 3 risks | **FAIL**: no residual added value |
+| Qwen3-4B | 0/16 | 1/9, 1 risk | 1/9, 1 risk | **INCONCLUSIVE**: insufficient contrast |
+
+On Qwen3-4B, 19 prompts always commit, 13 always roll back, and only 2 remain mixed. With zero mixed training prompts, the pre-registered within-prompt residual, TF-IDF, and next-token classifiers cannot be fit. This does **not** show that residual probes fail at 4B; it shows that the contrast-selected 0.6B benchmark does not transfer as a valid 4B scale point. Replacing prompts after observing this collapse would change the estimand.
+
+The full FP16 run fits locally on the RTX 3060: six-layer capture peaked at `7.644 GiB` allocated, generated `21.231` tokens/s, and cost `1.026x` plain generation (95% CI `1.016-1.037`) with identical paired outputs. No cloud GPU was required.
+
+See `results/PREREGISTERED_V4B_CROSS_SCALE_PROTOCOL.md`, `results/V4_V4B_CROSS_SCALE_REPORT.md`, and `results/trajectory_v4b_confirmatory/Qwen__Qwen3-4B/V4B_CONFIRMATORY_RESULTS.md`.
+
 Re-run the frozen confirmation after regenerating the discovery manifest:
 
 ```powershell
@@ -306,6 +326,7 @@ The repository includes a minimal `app.py` for this future static preview path.
 - [x] Pre-registered within-prompt v4 evaluation
 - [x] Visible-prefix TF-IDF, next-token, and model-judge baselines
 - [x] Paired monitoring-cost benchmark
+- [x] Pre-registered Qwen3-4B frozen-prompt cross-scale replication
 - [x] Hugging Face Spaces result browser
 
 ## Acknowledgements

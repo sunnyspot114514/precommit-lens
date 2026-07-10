@@ -22,6 +22,7 @@ V4_RESULT_PATH = (
     "results/trajectory_v4_confirmatory/Qwen__Qwen3-0.6B/V4_CONFIRMATORY_RESULTS.md"
 )
 V4_DISCOVERY_PATH = "results/TRAJECTORY_V4_DISCOVERY_REPORT.md"
+V4B_CROSS_SCALE_PATH = "results/V4_V4B_CROSS_SCALE_REPORT.md"
 INTERVENTION_PATH = (
     "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/"
     "intervention_early_spoiler_suppress_reveal.json"
@@ -40,6 +41,8 @@ with gr.Blocks(title="PreCommitLens") as demo:
         """
     )
     with gr.Tabs():
+        with gr.Tab("v4b Cross-Scale"):
+            gr.Markdown(read_text(V4B_CROSS_SCALE_PATH))
         with gr.Tab("v4 Confirmatory"):
             gr.Markdown(read_text(V4_RESULT_PATH))
         with gr.Tab("v4 Discovery"):
