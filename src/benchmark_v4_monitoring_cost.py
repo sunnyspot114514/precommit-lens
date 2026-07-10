@@ -13,7 +13,7 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from run_dense_jlens_qwen import apply_chat_template, choose_dtype, get_layers
-from run_trajectory_sampling import generate_one, read_jsonl
+from run_trajectory_sampling import generate_one, parse_ints, read_jsonl
 
 
 def parse_args() -> argparse.Namespace:
@@ -29,12 +29,16 @@ def parse_args() -> argparse.Namespace:
         default=Path("results/trajectory_v4_confirmatory/Qwen__Qwen3-0.6B"),
     )
     parser.add_argument("--model-id", default="Qwen/Qwen3-0.6B")
+    parser.add_argument("--revision", default=None)
     parser.add_argument("--samples-per-prompt", type=int, default=2)
     parser.add_argument("--seed-start", type=int, default=9000000)
     parser.add_argument("--temperature", type=float, default=0.8)
     parser.add_argument("--top-p", type=float, default=0.95)
     parser.add_argument("--max-new-tokens", type=int, default=48)
     parser.add_argument("--max-seq-len", type=int, default=256)
+    parser.add_argument("--checkpoints", default="0,2,4,6,8,10,12,16,24")
+    parser.add_argument("--layers", default="0,6,12,18,24,27")
+    parser.add_argument("--primary-layer", type=int, default=18)
     parser.add_argument("--dtype", choices=["auto", "float16", "bfloat16", "float32"], default="float16")
     parser.add_argument("--allow-download", action="store_true")
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
@@ -61,8 +65,8 @@ def run_mode(
         top_p=args.top_p,
         max_new_tokens=args.max_new_tokens,
         capture_checkpoints=capture,
-        checkpoints=[0, 2, 4, 6, 8, 10, 12, 16, 24],
-        layers=[0, 6, 12, 18, 24, 27],
+        checkpoints=args.parsed_checkpoints,
+        layers=args.parsed_layers,
     )
     if torch.cuda.is_available():
         torch.cuda.synchronize()
@@ -80,24 +84,32 @@ def bootstrap_ratio(plain: np.ndarray, capture: np.ndarray, samples: int = 2000)
 
 def main() -> None:
     args = parse_args()
+    args.parsed_checkpoints = parse_ints(args.checkpoints)
+    args.parsed_layers = parse_ints(args.layers)
+    if args.primary_layer not in args.parsed_layers:
+        raise ValueError("Primary layer must be included in --layers")
     rows = [row for row in read_jsonl(args.cases) if row["trajectory_split"] == "test"]
     device = torch.device(args.device)
     dtype = choose_dtype(args.dtype, device)
     tokenizer = AutoTokenizer.from_pretrained(
-        args.model_id, local_files_only=not args.allow_download, trust_remote_code=True
+        args.model_id,
+        revision=args.revision,
+        local_files_only=not args.allow_download,
+        trust_remote_code=True,
     )
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
     model = AutoModelForCausalLM.from_pretrained(
         args.model_id,
+        revision=args.revision,
         local_files_only=not args.allow_download,
         dtype=dtype,
         attn_implementation="eager",
         trust_remote_code=True,
     ).to(device)
     model.eval()
-    if len(get_layers(model)) <= 27:
-        raise ValueError("Model does not expose the frozen v4 layer set")
+    if max(args.parsed_layers) >= len(get_layers(model)):
+        raise ValueError("Model does not expose the requested monitoring layer set")
 
     batches = [
         {
@@ -148,12 +160,14 @@ def main() -> None:
     capture = np.asarray([row["capture_seconds"] for row in records], dtype=np.float64)
     summary = {
         "model_id": args.model_id,
+        "model_revision": args.revision,
         "prompt_count": len(rows),
         "paired_runs": len(records),
         "samples_per_prompt": args.samples_per_prompt,
         "seed_start": args.seed_start,
-        "checkpoints": [0, 2, 4, 6, 8, 10, 12, 16, 24],
-        "layers": [0, 6, 12, 18, 24, 27],
+        "checkpoints": args.parsed_checkpoints,
+        "layers": args.parsed_layers,
+        "primary_layer": args.primary_layer,
         "all_outputs_identical": all(row["identical_output"] for row in records),
         "plain_seconds_total": float(plain.sum()),
         "capture_seconds_total": float(capture.sum()),
@@ -179,8 +193,9 @@ def main() -> None:
         f"`{summary['capture_to_plain_ratio_ci95'][1]:.3f}`)",
         f"- mean paired overhead: `{summary['mean_paired_overhead_seconds']:.3f}` seconds/trajectory",
         "",
-        "This measures the current six-layer, nine-checkpoint research capture path. It is not "
-        "an estimate for a production hook that exports only layer 18.",
+        f"This measures the current {len(args.parsed_layers)}-layer, "
+        f"{len(args.parsed_checkpoints)}-checkpoint research capture path. It is not "
+        f"an estimate for a production hook that exports only layer {args.primary_layer}.",
     ]
     (args.out_dir / "MONITORING_COST_BENCHMARK.md").write_text(
         "\n".join(lines) + "\n", encoding="utf-8"

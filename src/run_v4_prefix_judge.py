@@ -39,6 +39,7 @@ def parse_args() -> argparse.Namespace:
         default=Path("data/prompt_sets/trajectory_confirmatory_v4.jsonl"),
     )
     parser.add_argument("--model-id", default="Qwen/Qwen3-0.6B")
+    parser.add_argument("--revision", default=None)
     parser.add_argument("--checkpoints", default="0,2,4,6,8,10,12")
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--max-length", type=int, default=768)
@@ -88,6 +89,7 @@ def main() -> None:
 
     tokenizer = AutoTokenizer.from_pretrained(
         args.model_id,
+        revision=args.revision,
         local_files_only=not args.allow_download,
         trust_remote_code=True,
     )
@@ -103,6 +105,7 @@ def main() -> None:
     dtype = choose_dtype(args.dtype, device)
     model = AutoModelForCausalLM.from_pretrained(
         args.model_id,
+        revision=args.revision,
         local_files_only=not args.allow_download,
         trust_remote_code=True,
         dtype=dtype,
@@ -179,6 +182,7 @@ def main() -> None:
     write_jsonl(args.run_dir / "prefix_judge_scores.jsonl", output_rows)
     summary = {
         "model_id": args.model_id,
+        "model_revision": args.revision,
         "judge_system": JUDGE_SYSTEM,
         "judge_instruction": JUDGE_INSTRUCTION,
         "answer_a_token_id": int(answer_a[0]),

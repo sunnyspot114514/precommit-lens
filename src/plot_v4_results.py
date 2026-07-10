@@ -45,6 +45,8 @@ def line(points: list[tuple[float, float]], color: str) -> str:
 def main() -> None:
     args = parse_args()
     payload = json.loads(args.analysis.read_text(encoding="utf-8"))
+    primary_layer = int(payload["protocol"]["primary_layer"])
+    experiment_label = str(payload["protocol"].get("experiment_label", "v4"))
     rows = [row for row in payload["checkpoint_results"] if row["checkpoint"] <= 12]
     checkpoints = [int(row["checkpoint"]) for row in rows]
 
@@ -65,8 +67,8 @@ def main() -> None:
     svg: list[str] = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
         '<rect width="100%" height="100%" fill="#ffffff"/>',
-        f'<text x="{left}" y="34" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="{COLORS["text"]}">v4 pre-landing trajectory prediction</text>',
-        f'<text x="{left}" y="58" font-family="Arial, sans-serif" font-size="14" fill="#58616b">Prompt-macro within-prompt AUC; Qwen3-0.6B; frozen test prompts</text>',
+        f'<text x="{left}" y="34" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="{COLORS["text"]}">{html.escape(experiment_label)} pre-landing trajectory prediction</text>',
+        f'<text x="{left}" y="58" font-family="Arial, sans-serif" font-size="14" fill="#58616b">Prompt-macro within-prompt AUC; frozen test prompts</text>',
     ]
 
     for value in (0.3, 0.5, 0.7, 0.9, 1.0):
@@ -83,7 +85,7 @@ def main() -> None:
     )
 
     method_values: dict[str, list[float | None]] = {
-        "residual": [row["metrics"]["residual_layer_18"]["auc"] for row in rows],
+        "residual": [row["metrics"][f"residual_layer_{primary_layer}"]["auc"] for row in rows],
         "tfidf": [row["metrics"]["visible_prefix_tfidf"]["auc"] for row in rows],
         "stats": [row["metrics"]["next_token_stats"]["auc"] for row in rows],
         "judge": [row["metrics"].get("prefix_model_judge", {}).get("auc") for row in rows],
@@ -97,7 +99,7 @@ def main() -> None:
         svg.append(line(points, COLORS[method]))
 
     legend = [
-        ("Residual L18", "residual"),
+        (f"Residual L{primary_layer}", "residual"),
         ("Visible-prefix TF-IDF", "tfidf"),
         ("Next-token stats", "stats"),
         ("Prefix model judge", "judge"),

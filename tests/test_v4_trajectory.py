@@ -25,6 +25,11 @@ class ConfirmatoryFreezeTests(unittest.TestCase):
         cls.config = yaml.safe_load(
             (ROOT / "configs" / "trajectory_confirmatory_v4.yaml").read_text(encoding="utf-8")
         )
+        cls.v4b_config = yaml.safe_load(
+            (ROOT / "configs" / "trajectory_confirmatory_v4b.yaml").read_text(
+                encoding="utf-8"
+            )
+        )
 
     def test_frozen_hash_and_prompt_count(self) -> None:
         self.assertEqual(len(self.rows), 34)
@@ -44,6 +49,17 @@ class ConfirmatoryFreezeTests(unittest.TestCase):
         self.assertEqual(counts[("early_spoiler", "train")], 10)
         self.assertEqual(counts[("hidden_fields", "validation")], 2)
         self.assertEqual(counts[("schema_bypass", "test")], 2)
+
+    def test_v4b_reuses_frozen_population_and_depth_mapping(self) -> None:
+        self.assertEqual(self.v4b_config["dataset_sha256"], self.config["dataset_sha256"])
+        self.assertEqual(self.v4b_config["sampling"], {
+            **self.config["sampling"],
+            "max_seq_len": 256,
+            "dtype": "float16",
+        })
+        self.assertEqual(self.v4b_config["features"]["layers"], [0, 8, 16, 23, 31, 35])
+        self.assertEqual(self.v4b_config["features"]["primary_layer"], 23)
+        self.assertFalse(self.v4b_config["discovery"]["model_specific_prompt_replacement"])
 
 
 class PairwiseMetricTests(unittest.TestCase):

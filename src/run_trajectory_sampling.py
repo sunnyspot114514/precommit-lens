@@ -32,6 +32,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--cases", type=Path, required=True)
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--model-id", default="Qwen/Qwen3-0.6B")
+    parser.add_argument("--revision", default=None)
     parser.add_argument("--allow-download", action="store_true")
     parser.add_argument("--conditions", default="concept_present_target_absent,target_present_concept_absent")
     parser.add_argument("--risks", default="")
@@ -302,6 +303,7 @@ def main() -> None:
     dtype = choose_dtype(args.dtype, device)
     tokenizer = AutoTokenizer.from_pretrained(
         args.model_id,
+        revision=args.revision,
         local_files_only=not args.allow_download,
         trust_remote_code=True,
     )
@@ -309,6 +311,7 @@ def main() -> None:
         tokenizer.pad_token = tokenizer.eos_token
     model = AutoModelForCausalLM.from_pretrained(
         args.model_id,
+        revision=args.revision,
         local_files_only=not args.allow_download,
         dtype=dtype,
         attn_implementation="eager",
@@ -400,6 +403,7 @@ def main() -> None:
 
     payload = {
         "model_id": args.model_id,
+        "model_revision": args.revision,
         "prompt_count": len(prompt_rows),
         "trajectory_count": len(trajectory_rows),
         "samples_per_prompt": args.samples_per_prompt,

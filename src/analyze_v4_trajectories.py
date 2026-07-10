@@ -43,6 +43,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--word-features", type=int, default=8000)
     parser.add_argument("--char-features", type=int, default=10000)
     parser.add_argument("--judge-scores", type=Path, default=None)
+    parser.add_argument("--primary-layer", type=int, default=PRIMARY_LAYER)
+    parser.add_argument(
+        "--primary-checkpoints",
+        default=",".join(str(value) for value in PRIMARY_CHECKPOINTS),
+    )
+    parser.add_argument("--expected-test-prompts", type=int, default=9)
+    parser.add_argument("--experiment-label", default="v4")
+    parser.add_argument("--analysis-name", default="v4_analysis.json")
+    parser.add_argument("--scores-name", default="trajectory_scores_v4.jsonl")
+    parser.add_argument("--report-name", default="V4_CONFIRMATORY_RESULTS.md")
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     return parser.parse_args()
 
@@ -327,6 +337,9 @@ def json_default(value: Any) -> Any:
 
 def main() -> None:
     args = parse_args()
+    primary_checkpoints = [
+        int(value.strip()) for value in args.primary_checkpoints.split(",") if value.strip()
+    ]
     trajectories = read_jsonl(args.run_dir / "trajectories.jsonl")
     cases = {str(row["case_id"]): row for row in read_jsonl(args.cases)}
     cache = np.load(args.run_dir / "trajectory_features.npz")
@@ -341,6 +354,10 @@ def main() -> None:
     valid = cache["valid"].astype(np.bool_)
     checkpoints = [int(value) for value in cache["checkpoints"].tolist()]
     layers = [int(value) for value in cache["layers"].tolist()]
+    if args.primary_layer not in layers:
+        raise ValueError(f"Primary layer {args.primary_layer} is not in captured layers {layers}")
+    if any(checkpoint not in checkpoints for checkpoint in primary_checkpoints):
+        raise ValueError("Every primary checkpoint must be present in the feature cache")
     labels = np.asarray(
         [row["policy_validator"]["decision"] == "rollback" for row in trajectories], dtype=np.int32
     )
@@ -525,7 +542,7 @@ def main() -> None:
             method_scores["prefix_model_judge"] = values
 
         methods_to_report = [
-            f"residual_layer_{PRIMARY_LAYER}",
+            f"residual_layer_{args.primary_layer}",
             "visible_prefix_tfidf",
             "next_token_stats",
         ]
@@ -553,7 +570,7 @@ def main() -> None:
             }
 
         comparison = paired_envelope_difference(
-            test_maps[f"residual_layer_{PRIMARY_LAYER}"],
+            test_maps[f"residual_layer_{args.primary_layer}"],
             test_maps["visible_prefix_tfidf"],
             test_maps["next_token_stats"],
             samples=args.bootstrap_samples,
@@ -615,7 +632,7 @@ def main() -> None:
         comparison = result["primary_comparison"]
         ci = comparison["ci95"]
         if (
-            checkpoint in PRIMARY_CHECKPOINTS
+            checkpoint in primary_checkpoints
             and result["evaluable_test_prompts"] >= 6
             and result["evaluable_test_risks"] >= 2
             and comparison["delta"] is not None
@@ -626,7 +643,7 @@ def main() -> None:
             winning.append(checkpoint)
     consecutive = [
         [left, right]
-        for left, right in zip(PRIMARY_CHECKPOINTS, PRIMARY_CHECKPOINTS[1:])
+        for left, right in zip(primary_checkpoints, primary_checkpoints[1:])
         if left in winning and right in winning
     ]
     gate = {
@@ -641,8 +658,10 @@ def main() -> None:
     violating_without_landing = sum(bool(labels[idx]) and landings[idx] < 0 for idx in range(len(labels)))
     payload = {
         "protocol": {
-            "primary_checkpoints": PRIMARY_CHECKPOINTS,
-            "primary_layer": PRIMARY_LAYER,
+            "experiment_label": args.experiment_label,
+            "primary_checkpoints": primary_checkpoints,
+            "primary_layer": args.primary_layer,
+            "expected_test_prompts": args.expected_test_prompts,
             "bootstrap_samples": args.bootstrap_samples,
             "epochs": args.epochs,
             "device": str(device),
@@ -666,19 +685,19 @@ def main() -> None:
             "monitoring_benchmark": monitoring_cost,
         },
     }
-    (args.run_dir / "v4_analysis.json").write_text(
+    (args.run_dir / args.analysis_name).write_text(
         json.dumps(payload, indent=2, default=json_default), encoding="utf-8"
     )
-    with (args.run_dir / "trajectory_scores_v4.jsonl").open("w", encoding="utf-8") as handle:
+    with (args.run_dir / args.scores_name).open("w", encoding="utf-8") as handle:
         for row in trajectory_score_rows:
             handle.write(json.dumps(row, sort_keys=True) + "\n")
 
     lines = [
-        "# v4 Confirmatory Trajectory Results",
+        f"# {args.experiment_label} Confirmatory Trajectory Results",
         "",
         f"- gate: **{gate['status'].upper()}**",
         f"- trajectories / prompts: `{len(trajectories)}` / `{len(set(prompts.tolist()))}`",
-        f"- fresh-seed mixed test prompts: `{test_yield['mixed_prompt_count']}/9` across "
+        f"- fresh-seed mixed test prompts: `{test_yield['mixed_prompt_count']}/{args.expected_test_prompts}` across "
         f"`{test_yield['mixed_risk_count']}` risks",
         f"- winning checkpoints: `{winning}`",
         f"- consecutive winning pairs: `{consecutive}`",
@@ -686,12 +705,12 @@ def main() -> None:
         "",
         "## Primary Checkpoint Curve",
         "",
-        "| checkpoint | prompts | risks | residual L18 | TF-IDF | next-token | envelope | delta [95% CI] | judge |",
+        f"| checkpoint | prompts | risks | residual L{args.primary_layer} | TF-IDF | next-token | envelope | delta [95% CI] | judge |",
         "|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for result in checkpoint_results:
         metrics = result["metrics"]
-        residual = metrics[f"residual_layer_{PRIMARY_LAYER}"]["auc"]
+        residual = metrics[f"residual_layer_{args.primary_layer}"]["auc"]
         text_auc = metrics["visible_prefix_tfidf"]["auc"]
         stat_auc = metrics["next_token_stats"]["auc"]
         judge_auc = metrics.get("prefix_model_judge", {}).get("auc")
@@ -708,12 +727,12 @@ def main() -> None:
             "",
             "## Secondary Layer Diagnostic",
             "",
-            "| checkpoint | primary L18 | best captured layer | best residual AUC |",
+            f"| checkpoint | primary L{args.primary_layer} | best captured layer | best residual AUC |",
             "|---:|---:|---:|---:|",
         ]
     )
     for result in checkpoint_results:
-        if result["checkpoint"] not in PRIMARY_CHECKPOINTS:
+        if result["checkpoint"] not in primary_checkpoints:
             continue
         candidates = [
             (int(layer), value.get("auc"))
@@ -723,7 +742,7 @@ def main() -> None:
         best_layer, best_auc = max(candidates, key=lambda item: item[1])
         lines.append(
             f"| {result['checkpoint']} | "
-            f"{fmt(result['metrics'][f'residual_layer_{PRIMARY_LAYER}']['auc'])} | "
+            f"{fmt(result['metrics'][f'residual_layer_{args.primary_layer}']['auc'])} | "
             f"{best_layer} | {fmt(best_auc)} |"
         )
     lines.extend(
@@ -746,7 +765,7 @@ def main() -> None:
         ratio_ci = monitoring_cost["capture_to_plain_ratio_ci95"]
         lines.extend(
             [
-                f"- Six-layer, nine-checkpoint capture/plain generation ratio: "
+                f"- {len(layers)}-layer, {len(checkpoints)}-checkpoint capture/plain generation ratio: "
                 f"`{monitoring_cost['capture_to_plain_ratio']:.3f}` "
                 f"(95% paired CI `{ratio_ci[0]:.3f}`-`{ratio_ci[1]:.3f}`; "
                 f"`{monitoring_cost['paired_runs']}` paired runs).",
@@ -761,15 +780,17 @@ def main() -> None:
             f"(`{judge_summary['milliseconds_per_unique_prefix']:.1f}` ms/prefix)."
         )
     residual_cost = payload["cost"]["mean_scoring_microseconds_per_row"].get(
-        f"residual_layer_{PRIMARY_LAYER}"
+        f"residual_layer_{args.primary_layer}"
     )
     if residual_cost is not None:
-        lines.append(f"- Layer-18 logistic scoring: `{residual_cost:.3f}` microseconds/row.")
+        lines.append(
+            f"- Layer-{args.primary_layer} logistic scoring: `{residual_cost:.3f}` microseconds/row."
+        )
     lines.extend(
         [
             "",
             "Secondary layers are post-hoc diagnostics. They cannot override the frozen "
-            "layer-18 gate.",
+            f"layer-{args.primary_layer} gate.",
         ]
     )
     lines.extend(
@@ -783,8 +804,8 @@ def main() -> None:
             "results are diagnostics and cannot override the frozen primary gate.",
         ]
     )
-    (args.run_dir / "V4_CONFIRMATORY_RESULTS.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(f"v4 gate: {gate['status']}")
+    (args.run_dir / args.report_name).write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"{args.experiment_label} gate: {gate['status']}")
     print(f"Saved analysis to {args.run_dir}")
 
 
