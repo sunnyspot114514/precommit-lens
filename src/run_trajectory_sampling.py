@@ -272,6 +272,8 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
         f"- temperature / top-p: `{payload['temperature']}` / `{payload['top_p']}`",
         f"- seed start: `{payload['seed_start']}`",
         f"- capture checkpoints: `{payload['capture_checkpoints']}`",
+        f"- CUDA peak allocated / reserved GiB: "
+        f"`{payload['cuda_peak_allocated_gib']}` / `{payload['cuda_peak_reserved_gib']}`",
         f"- generation tokens/sec: `{payload['tokens_per_second']:.3f}`",
         f"- eligible prompts: `{payload['eligible_prompt_count']}`",
         "",
@@ -318,6 +320,8 @@ def main() -> None:
         trust_remote_code=True,
     ).to(device)
     model.eval()
+    if device.type == "cuda":
+        torch.cuda.reset_peak_memory_stats(device)
     n_layers = len(get_layers(model))
     if any(layer < 0 or layer >= n_layers for layer in layers):
         raise ValueError(f"Requested layers {layers} outside 0..{n_layers - 1}")
@@ -421,6 +425,16 @@ def main() -> None:
         "screen_min_rate": args.screen_min_rate,
         "screen_max_rate": args.screen_max_rate,
         "eligible_prompt_count": len(eligible_ids),
+        "cuda_peak_allocated_gib": (
+            round(torch.cuda.max_memory_allocated(device) / 2**30, 3)
+            if device.type == "cuda"
+            else None
+        ),
+        "cuda_peak_reserved_gib": (
+            round(torch.cuda.max_memory_reserved(device) / 2**30, 3)
+            if device.type == "cuda"
+            else None
+        ),
         "prompt_summary": prompt_summary,
     }
     write_jsonl(out_dir / "prompts.jsonl", prompt_rows)

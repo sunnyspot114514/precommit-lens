@@ -112,6 +112,8 @@ def main() -> None:
         attn_implementation="eager",
     ).to(device)
     model.eval()
+    if device.type == "cuda":
+        torch.cuda.reset_peak_memory_stats(device)
 
     scoring_rows: list[dict[str, Any]] = []
     unique_texts: dict[str, int] = {}
@@ -198,6 +200,16 @@ def main() -> None:
         "device": str(device),
         "dtype": args.dtype,
         "batch_size": args.batch_size,
+        "cuda_peak_allocated_gib": (
+            round(torch.cuda.max_memory_allocated(device) / 2**30, 3)
+            if device.type == "cuda"
+            else None
+        ),
+        "cuda_peak_reserved_gib": (
+            round(torch.cuda.max_memory_reserved(device) / 2**30, 3)
+            if device.type == "cuda"
+            else None
+        ),
     }
     (args.run_dir / "prefix_judge_summary.json").write_text(
         json.dumps(summary, indent=2), encoding="utf-8"

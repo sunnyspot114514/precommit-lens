@@ -108,6 +108,8 @@ def main() -> None:
         trust_remote_code=True,
     ).to(device)
     model.eval()
+    if device.type == "cuda":
+        torch.cuda.reset_peak_memory_stats(device)
     if max(args.parsed_layers) >= len(get_layers(model)):
         raise ValueError("Model does not expose the requested monitoring layer set")
 
@@ -174,6 +176,16 @@ def main() -> None:
         "capture_to_plain_ratio": float(capture.sum() / plain.sum()),
         "capture_to_plain_ratio_ci95": bootstrap_ratio(plain, capture),
         "mean_paired_overhead_seconds": float(np.mean(capture - plain)),
+        "cuda_peak_allocated_gib": (
+            round(torch.cuda.max_memory_allocated(device) / 2**30, 3)
+            if device.type == "cuda"
+            else None
+        ),
+        "cuda_peak_reserved_gib": (
+            round(torch.cuda.max_memory_reserved(device) / 2**30, 3)
+            if device.type == "cuda"
+            else None
+        ),
         "records": records,
     }
     args.out_dir.mkdir(parents=True, exist_ok=True)
@@ -192,6 +204,8 @@ def main() -> None:
         f"(95% paired bootstrap CI `{summary['capture_to_plain_ratio_ci95'][0]:.3f}`-"
         f"`{summary['capture_to_plain_ratio_ci95'][1]:.3f}`)",
         f"- mean paired overhead: `{summary['mean_paired_overhead_seconds']:.3f}` seconds/trajectory",
+        f"- CUDA peak allocated / reserved GiB: `{summary['cuda_peak_allocated_gib']}` / "
+        f"`{summary['cuda_peak_reserved_gib']}`",
         "",
         f"This measures the current {len(args.parsed_layers)}-layer, "
         f"{len(args.parsed_checkpoints)}-checkpoint research capture path. It is not "
