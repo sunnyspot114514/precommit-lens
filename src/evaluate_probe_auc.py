@@ -45,6 +45,7 @@ from run_dense_jlens_qwen import (  # noqa: E402
     load_lens_npz,
     safe_name,
 )
+from runtime_validators import lexical_validate, validate_runtime_output  # noqa: E402
 
 
 DEFAULT_CONCEPT_TOKEN_TEXTS: dict[str, list[str]] = {
@@ -83,6 +84,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-new-tokens", type=int, default=32)
     parser.add_argument("--no-generate", action="store_true")
     parser.add_argument("--linear-probe", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--cross-risk-probe", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--probe-label", choices=["expected_rollback", "semantic_risk", "generated_rollback"], default="expected_rollback")
     parser.add_argument("--probe-epochs", type=int, default=160)
     parser.add_argument("--bootstrap-samples", type=int, default=500)
@@ -146,9 +148,7 @@ def build_concept_token_ids(tokenizer: Any, concept_texts: dict[str, list[str]])
 
 
 def validate_output(text: str, patterns: list[str]) -> dict[str, Any]:
-    low = text.lower()
-    hits = [p for p in patterns if p.lower() in low]
-    return {"decision": "rollback" if hits else "commit", "hits": hits}
+    return lexical_validate(text, patterns)
 
 
 def decode_generation(tokenizer: Any, full_ids: torch.Tensor, prompt_len: int) -> str:
@@ -339,12 +339,35 @@ def split_groups(rows: list[dict[str, Any]]) -> dict[str, str]:
     return assignments
 
 
+def assign_splits(rows: list[dict[str, Any]]) -> str:
+    declared = [row.get("template_split") for row in rows]
+    if declared and all(value in {"train", "val", "test"} for value in declared):
+        family_splits: dict[str, str] = {}
+        for row in rows:
+            family = str(row.get("template_family", row.get("pair_id", row["case_id"])))
+            split = str(row["template_split"])
+            previous = family_splits.setdefault(family, split)
+            if previous != split:
+                raise ValueError(f"Template family {family!r} crosses splits: {previous!r} vs {split!r}")
+            row["split"] = split
+        return "declared_template_family"
+
+    group_splits = split_groups(rows)
+    for row in rows:
+        row["split"] = group_splits[str(row.get("pair_id", row["case_id"]))]
+    return "hashed_pair_id"
+
+
 def labels_from_row(row: dict[str, Any]) -> dict[str, int]:
     generated = row.get("generated_validator", {})
+    policy = row.get("generated_policy_validator", {})
+    structural = row.get("generated_structural_validator", {})
     return {
         "expected_rollback": int(row.get("expected_validator_decision") == "rollback"),
         "semantic_risk": int(bool(row.get("semantic_risk_label"))),
         "generated_rollback": int(generated.get("decision") == "rollback"),
+        "generated_policy_violation": int(policy.get("decision") == "rollback"),
+        "generated_structural_rollback": int(structural.get("decision") == "rollback"),
     }
 
 
@@ -426,6 +449,7 @@ def bootstrap_auc_ci(
     scores: list[float],
     labels: list[int],
     samples: int,
+    clusters: list[str] | None = None,
     seed: int = 7,
 ) -> list[float | None]:
     base = roc_auc(scores, labels)
@@ -433,9 +457,24 @@ def bootstrap_auc_ci(
         return [None, None]
     rng = np.random.default_rng(seed)
     n = len(scores)
+    cluster_indices: dict[str, list[int]] = defaultdict(list)
+    if clusters is not None:
+        if len(clusters) != n:
+            raise ValueError("clusters must match scores length")
+        for idx, cluster in enumerate(clusters):
+            cluster_indices[str(cluster)].append(idx)
+    cluster_names = sorted(cluster_indices)
     aucs = []
     for _ in range(samples):
-        idx = rng.integers(0, n, size=n)
+        if cluster_names:
+            sampled = rng.integers(0, len(cluster_names), size=len(cluster_names))
+            idx = [
+                row_idx
+                for cluster_idx in sampled
+                for row_idx in cluster_indices[cluster_names[int(cluster_idx)]]
+            ]
+        else:
+            idx = rng.integers(0, n, size=n).tolist()
         auc = roc_auc([scores[i] for i in idx], [labels[i] for i in idx])
         if auc is not None:
             aucs.append(auc)
@@ -455,6 +494,7 @@ def metric_payload(
     subset = [row for row in rows if split is None or row.get("split") == split]
     scores = [float(row.get("scores", {}).get(method, {}).get("score", float("nan"))) for row in subset]
     labels = [labels_from_row(row)[label_name] for row in subset]
+    clusters = [str(row.get("pair_id", row["case_id"])) for row in subset]
     auc = roc_auc(scores, labels)
     return {
         "method": method,
@@ -464,7 +504,8 @@ def metric_payload(
         "positive": int(sum(labels)),
         "negative": int(len(labels) - sum(labels)),
         "auc": auc,
-        "auc_ci95": bootstrap_auc_ci(scores, labels, bootstrap_samples),
+        "auc_ci95": bootstrap_auc_ci(scores, labels, bootstrap_samples, clusters=clusters),
+        "bootstrap_unit": "pair_id",
         "auprc": average_precision(scores, labels),
         "fpr_at_90_tpr": fpr_at_tpr(scores, labels, 0.9),
     }
@@ -570,16 +611,81 @@ def run_linear_probes(
     }
 
 
+def run_cross_risk_linear_probes(
+    rows: list[dict[str, Any]],
+    hidden_by_layer: dict[int, list[np.ndarray]],
+    label_name: str,
+    epochs: int,
+    device: torch.device,
+) -> dict[str, Any]:
+    labels = torch.tensor([labels_from_row(row)[label_name] for row in rows], dtype=torch.float32)
+    probe_device = device if device.type == "cuda" else torch.device("cpu")
+    by_risk: dict[str, Any] = {}
+    for heldout_risk in sorted({str(row["risk_type"]) for row in rows}):
+        split_mask = {
+            "train": torch.tensor(
+                [row.get("split") == "train" and row["risk_type"] != heldout_risk for row in rows],
+                dtype=torch.bool,
+            ),
+            "val": torch.tensor(
+                [row.get("split") == "val" and row["risk_type"] != heldout_risk for row in rows],
+                dtype=torch.bool,
+            ),
+            "test": torch.tensor(
+                [row.get("split") == "test" and row["risk_type"] == heldout_risk for row in rows],
+                dtype=torch.bool,
+            ),
+        }
+        candidates = []
+        cached_scores: dict[int, list[float]] = {}
+        layer_results: dict[str, Any] = {}
+        for layer, features_list in sorted(hidden_by_layer.items()):
+            features = torch.from_numpy(np.stack(features_list).astype(np.float32))
+            result = train_linear_probe_for_layer(features, labels, split_mask, epochs, probe_device)
+            layer_results[str(layer)] = {key: value for key, value in result.items() if not key.endswith("_scores")}
+            if result.get("skipped") or result.get("val_auc") is None:
+                continue
+            cached_scores[layer] = [float(value) for value in result.get("test_scores", [])]
+            candidates.append((layer, float(result["val_auc"]), result.get("test_auc")))
+        if not candidates:
+            by_risk[heldout_risk] = {"best_layer": None, "layers": layer_results}
+            continue
+        best_layer, best_val_auc, best_test_auc = max(candidates, key=lambda item: item[1])
+        test_indices = [
+            idx
+            for idx, row in enumerate(rows)
+            if row.get("split") == "test" and row["risk_type"] == heldout_risk
+        ]
+        for idx, score in zip(test_indices, cached_scores[best_layer]):
+            rows[idx].setdefault("scores", {})["linear_probe_cross_risk"] = {
+                "score": float(score),
+                "rank": None,
+                "logit": float(score),
+                "layer": best_layer,
+                "concept": f"trained_without_{heldout_risk}",
+            }
+        by_risk[heldout_risk] = {
+            "best_layer": best_layer,
+            "source_val_auc": best_val_auc,
+            "heldout_test_auc": best_test_auc,
+            "layers": layer_results,
+        }
+    return {"label": label_name, "by_heldout_risk": by_risk}
+
+
 def write_case_scores(path: Path, rows: list[dict[str, Any]]) -> None:
     fieldnames = [
         "case_id",
         "risk_type",
         "pair_id",
+        "template_family",
         "condition",
         "split",
         "expected_rollback",
         "semantic_risk",
         "generated_rollback",
+        "generated_policy_violation",
+        "generated_structural_rollback",
         "target_present",
         "logit_lens_score",
         "dense_jlens_score",
@@ -587,6 +693,8 @@ def write_case_scores(path: Path, rows: list[dict[str, Any]]) -> None:
         "linear_probe_score",
         "generated_validator_decision",
         "generated_validator_hits",
+        "generated_policy_hits",
+        "generated_structural_hits",
     ]
     with path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -599,11 +707,14 @@ def write_case_scores(path: Path, rows: list[dict[str, Any]]) -> None:
                     "case_id": row["case_id"],
                     "risk_type": row["risk_type"],
                     "pair_id": row["pair_id"],
+                    "template_family": row.get("template_family"),
                     "condition": row["condition"],
                     "split": row.get("split"),
                     "expected_rollback": labels["expected_rollback"],
                     "semantic_risk": labels["semantic_risk"],
                     "generated_rollback": labels["generated_rollback"],
+                    "generated_policy_violation": labels["generated_policy_violation"],
+                    "generated_structural_rollback": labels["generated_structural_rollback"],
                     "target_present": int(bool(row.get("target_present"))),
                     "logit_lens_score": scores.get("logit_lens", {}).get("score"),
                     "dense_jlens_score": scores.get("dense_jlens", {}).get("score"),
@@ -611,6 +722,8 @@ def write_case_scores(path: Path, rows: list[dict[str, Any]]) -> None:
                     "linear_probe_score": scores.get("linear_probe", {}).get("score"),
                     "generated_validator_decision": row.get("generated_validator", {}).get("decision"),
                     "generated_validator_hits": ";".join(row.get("generated_validator", {}).get("hits", [])),
+                    "generated_policy_hits": ";".join(row.get("generated_policy_validator", {}).get("hits", [])),
+                    "generated_structural_hits": ";".join(row.get("generated_structural_validator", {}).get("hits", [])),
                 }
             )
 
@@ -633,6 +746,8 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
         f"- generated outputs: `{payload['generated_outputs']}`",
         f"- dense lens: `{payload.get('dense_lens') or 'none'}`",
         f"- JVP layers: `{payload.get('jvp_layers') or []}`",
+        f"- split strategy: `{payload.get('split_strategy')}`",
+        "- AUC CI bootstrap unit: `pair_id`",
         "",
         "## Main Metrics",
         "",
@@ -657,6 +772,7 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
             f"- selected layer: `{payload['linear_probe'].get('best_layer')}`",
             f"- validation AUC: `{fmt(payload['linear_probe'].get('best_val_auc'))}`",
             f"- test AUC: `{fmt(payload['linear_probe'].get('best_test_auc'))}`",
+            f"- cross-risk probe: `{bool(payload.get('cross_risk_probe'))}`",
             "",
             "## Runtime Cost",
             "",
@@ -693,9 +809,7 @@ def main() -> None:
     dtype = choose_dtype(args.dtype, device)
     torch.backends.cuda.matmul.allow_tf32 = True
 
-    group_splits = split_groups(rows)
-    for row in rows:
-        row["split"] = group_splits[str(row.get("pair_id", row["case_id"]))]
+    split_strategy = assign_splits(rows)
 
     print(f"Loading {args.model_id} on {device} ({dtype})", flush=True)
     _ = AutoConfig.from_pretrained(args.model_id, local_files_only=not args.allow_download, trust_remote_code=True)
@@ -795,10 +909,15 @@ def main() -> None:
             text = generate_text(model, tokenizer, batch, args.max_new_tokens)
             timing["generation"] += time.perf_counter() - t0
             row["generated"] = text
-            row["generated_validator"] = validate_output(text, row.get("forbidden_output_patterns", []))
+            validators = validate_runtime_output(text, row)
+            row["generated_validator"] = validators["lexical"]
+            row["generated_policy_validator"] = validators["policy"]
+            row["generated_structural_validator"] = validators["structural"]
         else:
             row["generated"] = ""
             row["generated_validator"] = {"decision": "not_run", "hits": []}
+            row["generated_policy_validator"] = {"decision": "not_run", "hits": []}
+            row["generated_structural_validator"] = {"decision": "not_run", "hits": []}
 
         if idx % 25 == 0 or idx == len(rows):
             print(f"[{idx}/{len(rows)}] evaluated {row['case_id']}", flush=True)
@@ -809,6 +928,18 @@ def main() -> None:
         linear_payload = run_linear_probes(rows, hidden_by_layer, args.probe_label, args.probe_epochs, device)
         timing["linear_probe_training"] += time.perf_counter() - t0
 
+    cross_risk_payload: dict[str, Any] | None = None
+    if args.cross_risk_probe:
+        t0 = time.perf_counter()
+        cross_risk_payload = run_cross_risk_linear_probes(
+            rows,
+            hidden_by_layer,
+            args.probe_label,
+            args.probe_epochs,
+            device,
+        )
+        timing["cross_risk_probe_training"] += time.perf_counter() - t0
+
     methods = ["keyword_target_present", "keyword_hit_count", "logit_lens"]
     if dense_lens:
         methods.append("dense_jlens")
@@ -816,14 +947,24 @@ def main() -> None:
         methods.append("jvp_lens")
     if linear_payload.get("best_layer") is not None:
         methods.append("linear_probe")
+    if cross_risk_payload is not None:
+        methods.append("linear_probe_cross_risk")
 
+    labels_to_report = ["semantic_risk", "generated_rollback"]
+    if any(row.get("runtime_validation") for row in rows):
+        labels_to_report.extend(["generated_policy_violation", "generated_structural_rollback"])
     metrics = []
-    for label_name in ["expected_rollback", "semantic_risk", "generated_rollback"]:
+    for label_name in labels_to_report:
         for method in methods:
-            metrics.append(
-                metric_payload(rows, method, label_name, split=None, bootstrap_samples=args.bootstrap_samples)
-            )
+            if method != "linear_probe_cross_risk":
+                metrics.append(
+                    metric_payload(rows, method, label_name, split=None, bootstrap_samples=args.bootstrap_samples)
+                )
             if method == "linear_probe":
+                metrics.append(
+                    metric_payload(rows, method, label_name, split="test", bootstrap_samples=args.bootstrap_samples)
+                )
+            elif method == "linear_probe_cross_risk":
                 metrics.append(
                     metric_payload(rows, method, label_name, split="test", bootstrap_samples=args.bootstrap_samples)
                 )
@@ -834,9 +975,11 @@ def main() -> None:
         "layers": layers,
         "jvp_layers": jvp_layers,
         "generated_outputs": generated_outputs,
+        "split_strategy": split_strategy,
         "dense_lens": str(args.dense_lens) if args.dense_lens else None,
         "metrics": metrics,
         "linear_probe": linear_payload,
+        "cross_risk_probe": cross_risk_payload,
         "timing_seconds": dict(timing),
         "concept_token_ids": concept_ids,
     }

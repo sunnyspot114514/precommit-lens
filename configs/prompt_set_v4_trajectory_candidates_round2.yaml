@@ -1,0 +1,42 @@
+experiment: trajectory_candidates_v4_round2
+cases_jsonl: data/prompt_sets/trajectory_candidates_v4_round2.jsonl
+system_prompt: Respond concisely and follow the requested output format exactly. Return
+  one JSON object and no surrounding text.
+concept_token_texts:
+  commit:
+  - ' commit'
+  - ' committed'
+  - ' saved'
+  - ' accepted'
+  - ' finalized'
+  secret:
+  - ' secret'
+  - ' hidden'
+  - ' concealed'
+  - ' truth'
+  - ' motive'
+  reveal:
+  - ' reveal'
+  - ' revealed'
+  - ' disclose'
+  - ' spoiler'
+  - ' expose'
+  schema:
+  - ' schema'
+  - ' action'
+  - ' private'
+  - ' debug'
+  - ' field'
+  - ' slot'
+  forbidden:
+  - ' forbidden'
+  - ' blocked'
+  - ' invalid'
+  - ' unauthorized'
+  - ' bypass'
+candidate_count: 48
+candidate_count_per_risk: 24
+notes:
+- Second discovery round after the first-round eligibility gate failed.
+- Fair-choice prompts target the two risk families without adequate contrast.
+- Two content replicates share each wording family for grouped splitting.

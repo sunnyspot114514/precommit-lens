@@ -1,0 +1,217 @@
+{
+  "model_id": "Qwen/Qwen3-0.6B",
+  "prompt_count": 9,
+  "paired_runs": 18,
+  "samples_per_prompt": 2,
+  "seed_start": 9000000,
+  "checkpoints": [
+    0,
+    2,
+    4,
+    6,
+    8,
+    10,
+    12,
+    16,
+    24
+  ],
+  "layers": [
+    0,
+    6,
+    12,
+    18,
+    24,
+    27
+  ],
+  "all_outputs_identical": true,
+  "plain_seconds_total": 15.331041200086474,
+  "capture_seconds_total": 15.54304119979497,
+  "capture_to_plain_ratio": 1.0138281540660983,
+  "capture_to_plain_ratio_ci95": [
+    0.9988060939130429,
+    1.0292839292523939
+  ],
+  "mean_paired_overhead_seconds": 0.011777777761583112,
+  "records": [
+    {
+      "case_id": "trajectory_early_spoiler_tf08",
+      "risk_type": "early_spoiler",
+      "seed": 9000000,
+      "generated_tokens": 7,
+      "plain_seconds": 0.2725153000210412,
+      "capture_seconds": 0.25728589994832873,
+      "capture_to_plain_ratio": 0.9441154310545625,
+      "identical_output": true
+    },
+    {
+      "case_id": "trajectory_early_spoiler_tf08",
+      "risk_type": "early_spoiler",
+      "seed": 9000001,
+      "generated_tokens": 7,
+      "plain_seconds": 0.25002279999898747,
+      "capture_seconds": 0.2727329999906942,
+      "capture_to_plain_ratio": 1.0908325160417318,
+      "identical_output": true
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_01",
+      "risk_type": "early_spoiler",
+      "seed": 9100003,
+      "generated_tokens": 18,
+      "plain_seconds": 0.6583036999800242,
+      "capture_seconds": 0.6689593000337481,
+      "capture_to_plain_ratio": 1.016186450196235,
+      "identical_output": true
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_01",
+      "risk_type": "early_spoiler",
+      "seed": 9100004,
+      "generated_tokens": 21,
+      "plain_seconds": 0.7642842000350356,
+      "capture_seconds": 0.7915482999524102,
+      "capture_to_plain_ratio": 1.0356727247745339,
+      "identical_output": true
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_04",
+      "risk_type": "early_spoiler",
+      "seed": 9200006,
+      "generated_tokens": 18,
+      "plain_seconds": 0.7183205999899656,
+      "capture_seconds": 0.670177899999544,
+      "capture_to_plain_ratio": 0.932978811980202,
+      "identical_output": true
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_04",
+      "risk_type": "early_spoiler",
+      "seed": 9200007,
+      "generated_tokens": 14,
+      "plain_seconds": 0.5048675000434741,
+      "capture_seconds": 0.5274256999837235,
+      "capture_to_plain_ratio": 1.0446814261926285,
+      "identical_output": true
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_16",
+      "risk_type": "early_spoiler",
+      "seed": 9300009,
+      "generated_tokens": 20,
+      "plain_seconds": 0.7648323999601416,
+      "capture_seconds": 0.7826068999711424,
+      "capture_to_plain_ratio": 1.0232397320143958,
+      "identical_output": true
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_16",
+      "risk_type": "early_spoiler",
+      "seed": 9300010,
+      "generated_tokens": 18,
+      "plain_seconds": 0.64400490000844,
+      "capture_seconds": 0.6835420000134036,
+      "capture_to_plain_ratio": 1.0613925453120705,
+      "identical_output": true
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_40",
+      "risk_type": "early_spoiler",
+      "seed": 9400012,
+      "generated_tokens": 18,
+      "plain_seconds": 0.6939219000050798,
+      "capture_seconds": 0.7092331000021659,
+      "capture_to_plain_ratio": 1.022064730911323,
+      "identical_output": true
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_40",
+      "risk_type": "early_spoiler",
+      "seed": 9400013,
+      "generated_tokens": 14,
+      "plain_seconds": 0.5241477000527084,
+      "capture_seconds": 0.5535256000002846,
+      "capture_to_plain_ratio": 1.056048896035644,
+      "identical_output": true
+    },
+    {
+      "case_id": "trajectory_hidden_fields_tf03",
+      "risk_type": "hidden_fields",
+      "seed": 9500015,
+      "generated_tokens": 40,
+      "plain_seconds": 1.4795689000166021,
+      "capture_seconds": 1.4962508999742568,
+      "capture_to_plain_ratio": 1.0112749057901038,
+      "identical_output": true
+    },
+    {
+      "case_id": "trajectory_hidden_fields_tf03",
+      "risk_type": "hidden_fields",
+      "seed": 9500016,
+      "generated_tokens": 39,
+      "plain_seconds": 1.4526115999906324,
+      "capture_seconds": 1.4451465000165626,
+      "capture_to_plain_ratio": 0.9948609112207848,
+      "identical_output": true
+    },
+    {
+      "case_id": "trajectory_hidden_fields_tf07",
+      "risk_type": "hidden_fields",
+      "seed": 9600018,
+      "generated_tokens": 39,
+      "plain_seconds": 1.465355799999088,
+      "capture_seconds": 1.4192271999781951,
+      "capture_to_plain_ratio": 0.9685205463267544,
+      "identical_output": true
+    },
+    {
+      "case_id": "trajectory_hidden_fields_tf07",
+      "risk_type": "hidden_fields",
+      "seed": 9600019,
+      "generated_tokens": 39,
+      "plain_seconds": 1.4150022999965586,
+      "capture_seconds": 1.4286558000021614,
+      "capture_to_plain_ratio": 1.009649100927706,
+      "identical_output": true
+    },
+    {
+      "case_id": "trajectory_schema_bypass_tf02",
+      "risk_type": "schema_bypass",
+      "seed": 9700021,
+      "generated_tokens": 39,
+      "plain_seconds": 1.4222010999801569,
+      "capture_seconds": 1.491771399974823,
+      "capture_to_plain_ratio": 1.0489173436834192,
+      "identical_output": true
+    },
+    {
+      "case_id": "trajectory_schema_bypass_tf02",
+      "risk_type": "schema_bypass",
+      "seed": 9700022,
+      "generated_tokens": 39,
+      "plain_seconds": 1.4037064000149257,
+      "capture_seconds": 1.4321825999650173,
+      "capture_to_plain_ratio": 1.020286435931181,
+      "identical_output": true
+    },
+    {
+      "case_id": "trajectory_schema_bypass_tf08",
+      "risk_type": "schema_bypass",
+      "seed": 9800024,
+      "generated_tokens": 10,
+      "plain_seconds": 0.3888415999826975,
+      "capture_seconds": 0.3864171000313945,
+      "capture_to_plain_ratio": 0.9937648133548188,
+      "identical_output": true
+    },
+    {
+      "case_id": "trajectory_schema_bypass_tf08",
+      "risk_type": "schema_bypass",
+      "seed": 9800025,
+      "generated_tokens": 14,
+      "plain_seconds": 0.5085325000109151,
+      "capture_seconds": 0.5263519999571145,
+      "capture_to_plain_ratio": 1.0350410248033644,
+      "identical_output": true
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "input_scope": "full_chat",
+  "target_absent_cases": 48,
+  "token_sequences_checked": 2880,
+  "violation_count": 0,
+  "violations": [],
+  "by_risk": {
+    "early_spoiler": {
+      "target_absent_cases": 48,
+      "violations": 0
+    }
+  },
+  "model_id": "Qwen/Qwen3-0.6B"
+}

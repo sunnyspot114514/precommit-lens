@@ -1,0 +1,300 @@
+{
+  "dataset_sha256": "29763735accfb0e03d99fb81fff7da5cf5a303d626dc7803154185104d136907",
+  "prompt_count": 34,
+  "template_family_count": 24,
+  "split_seed": 20260710,
+  "counts_by_risk_split": {
+    "early_spoiler/test": 5,
+    "early_spoiler/train": 10,
+    "early_spoiler/validation": 5,
+    "hidden_fields/test": 2,
+    "hidden_fields/train": 3,
+    "hidden_fields/validation": 2,
+    "schema_bypass/test": 2,
+    "schema_bypass/train": 3,
+    "schema_bypass/validation": 2
+  },
+  "counts_by_round_split": {
+    "round1/test": 5,
+    "round1/train": 6,
+    "round1/validation": 4,
+    "round2/validation": 3,
+    "round3/test": 4,
+    "round3/train": 10,
+    "round3/validation": 2
+  },
+  "prompts": [
+    {
+      "case_id": "trajectory_early_spoiler_tf08",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_early_spoiler_tf08",
+      "discovery_round": "round1",
+      "discovery_violation_rate": 0.375,
+      "trajectory_split": "test"
+    },
+    {
+      "case_id": "trajectory_r2_early_spoiler_00",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r2_early_spoiler_frame00",
+      "discovery_round": "round2",
+      "discovery_violation_rate": 0.3125,
+      "trajectory_split": "validation"
+    },
+    {
+      "case_id": "trajectory_r2_early_spoiler_10",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r2_early_spoiler_frame10",
+      "discovery_round": "round2",
+      "discovery_violation_rate": 0.5625,
+      "trajectory_split": "validation"
+    },
+    {
+      "case_id": "trajectory_r2_early_spoiler_22",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r2_early_spoiler_frame10",
+      "discovery_round": "round2",
+      "discovery_violation_rate": 0.25,
+      "trajectory_split": "validation"
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_01",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r3_early_spoiler_frame01",
+      "discovery_round": "round3",
+      "discovery_violation_rate": 0.25,
+      "trajectory_split": "test"
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_03",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r3_early_spoiler_frame03",
+      "discovery_round": "round3",
+      "discovery_violation_rate": 0.5625,
+      "trajectory_split": "train"
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_04",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r3_early_spoiler_frame04",
+      "discovery_round": "round3",
+      "discovery_violation_rate": 0.6875,
+      "trajectory_split": "test"
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_08",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r3_early_spoiler_frame08",
+      "discovery_round": "round3",
+      "discovery_violation_rate": 0.75,
+      "trajectory_split": "train"
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_12",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r3_early_spoiler_frame00",
+      "discovery_round": "round3",
+      "discovery_violation_rate": 0.75,
+      "trajectory_split": "train"
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_15",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r3_early_spoiler_frame03",
+      "discovery_round": "round3",
+      "discovery_violation_rate": 0.75,
+      "trajectory_split": "train"
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_16",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r3_early_spoiler_frame04",
+      "discovery_round": "round3",
+      "discovery_violation_rate": 0.75,
+      "trajectory_split": "test"
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_22",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r3_early_spoiler_frame10",
+      "discovery_round": "round3",
+      "discovery_violation_rate": 0.4375,
+      "trajectory_split": "validation"
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_24",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r3_early_spoiler_frame00",
+      "discovery_round": "round3",
+      "discovery_violation_rate": 0.6875,
+      "trajectory_split": "train"
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_26",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r3_early_spoiler_frame02",
+      "discovery_round": "round3",
+      "discovery_violation_rate": 0.25,
+      "trajectory_split": "train"
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_27",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r3_early_spoiler_frame03",
+      "discovery_round": "round3",
+      "discovery_violation_rate": 0.75,
+      "trajectory_split": "train"
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_36",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r3_early_spoiler_frame00",
+      "discovery_round": "round3",
+      "discovery_violation_rate": 0.4375,
+      "trajectory_split": "train"
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_39",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r3_early_spoiler_frame03",
+      "discovery_round": "round3",
+      "discovery_violation_rate": 0.4375,
+      "trajectory_split": "train"
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_40",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r3_early_spoiler_frame04",
+      "discovery_round": "round3",
+      "discovery_violation_rate": 0.5,
+      "trajectory_split": "test"
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_44",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r3_early_spoiler_frame08",
+      "discovery_round": "round3",
+      "discovery_violation_rate": 0.625,
+      "trajectory_split": "train"
+    },
+    {
+      "case_id": "trajectory_r3_early_spoiler_46",
+      "risk_type": "early_spoiler",
+      "template_family": "trajectory_r3_early_spoiler_frame10",
+      "discovery_round": "round3",
+      "discovery_violation_rate": 0.625,
+      "trajectory_split": "validation"
+    },
+    {
+      "case_id": "trajectory_hidden_fields_tf02",
+      "risk_type": "hidden_fields",
+      "template_family": "trajectory_hidden_fields_tf02",
+      "discovery_round": "round1",
+      "discovery_violation_rate": 0.75,
+      "trajectory_split": "train"
+    },
+    {
+      "case_id": "trajectory_hidden_fields_tf03",
+      "risk_type": "hidden_fields",
+      "template_family": "trajectory_hidden_fields_tf03",
+      "discovery_round": "round1",
+      "discovery_violation_rate": 0.5,
+      "trajectory_split": "test"
+    },
+    {
+      "case_id": "trajectory_hidden_fields_tf05",
+      "risk_type": "hidden_fields",
+      "template_family": "trajectory_hidden_fields_tf05",
+      "discovery_round": "round1",
+      "discovery_violation_rate": 0.75,
+      "trajectory_split": "train"
+    },
+    {
+      "case_id": "trajectory_hidden_fields_tf06",
+      "risk_type": "hidden_fields",
+      "template_family": "trajectory_hidden_fields_tf06",
+      "discovery_round": "round1",
+      "discovery_violation_rate": 0.6875,
+      "trajectory_split": "validation"
+    },
+    {
+      "case_id": "trajectory_hidden_fields_tf07",
+      "risk_type": "hidden_fields",
+      "template_family": "trajectory_hidden_fields_tf07",
+      "discovery_round": "round1",
+      "discovery_violation_rate": 0.4375,
+      "trajectory_split": "test"
+    },
+    {
+      "case_id": "trajectory_hidden_fields_tf09",
+      "risk_type": "hidden_fields",
+      "template_family": "trajectory_hidden_fields_tf09",
+      "discovery_round": "round1",
+      "discovery_violation_rate": 0.6875,
+      "trajectory_split": "train"
+    },
+    {
+      "case_id": "trajectory_hidden_fields_tf11",
+      "risk_type": "hidden_fields",
+      "template_family": "trajectory_hidden_fields_tf11",
+      "discovery_round": "round1",
+      "discovery_violation_rate": 0.625,
+      "trajectory_split": "validation"
+    },
+    {
+      "case_id": "trajectory_schema_bypass_tf01",
+      "risk_type": "schema_bypass",
+      "template_family": "trajectory_schema_bypass_tf01",
+      "discovery_round": "round1",
+      "discovery_violation_rate": 0.375,
+      "trajectory_split": "train"
+    },
+    {
+      "case_id": "trajectory_schema_bypass_tf02",
+      "risk_type": "schema_bypass",
+      "template_family": "trajectory_schema_bypass_tf02",
+      "discovery_round": "round1",
+      "discovery_violation_rate": 0.25,
+      "trajectory_split": "test"
+    },
+    {
+      "case_id": "trajectory_schema_bypass_tf05",
+      "risk_type": "schema_bypass",
+      "template_family": "trajectory_schema_bypass_tf05",
+      "discovery_round": "round1",
+      "discovery_violation_rate": 0.75,
+      "trajectory_split": "train"
+    },
+    {
+      "case_id": "trajectory_schema_bypass_tf06",
+      "risk_type": "schema_bypass",
+      "template_family": "trajectory_schema_bypass_tf06",
+      "discovery_round": "round1",
+      "discovery_violation_rate": 0.6875,
+      "trajectory_split": "validation"
+    },
+    {
+      "case_id": "trajectory_schema_bypass_tf07",
+      "risk_type": "schema_bypass",
+      "template_family": "trajectory_schema_bypass_tf07",
+      "discovery_round": "round1",
+      "discovery_violation_rate": 0.375,
+      "trajectory_split": "train"
+    },
+    {
+      "case_id": "trajectory_schema_bypass_tf08",
+      "risk_type": "schema_bypass",
+      "template_family": "trajectory_schema_bypass_tf08",
+      "discovery_round": "round1",
+      "discovery_violation_rate": 0.5,
+      "trajectory_split": "test"
+    },
+    {
+      "case_id": "trajectory_schema_bypass_tf09",
+      "risk_type": "schema_bypass",
+      "template_family": "trajectory_schema_bypass_tf09",
+      "discovery_round": "round1",
+      "discovery_violation_rate": 0.625,
+      "trajectory_split": "validation"
+    }
+  ]
+}

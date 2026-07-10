@@ -6,7 +6,7 @@ The local Qwen3-0.6B falsification stage is complete, and it does **not** suppor
 
 On the leakage-controlled v2 corpus, raw dense J-lens and selected-layer JVP do not beat keyword baselines on the primary `expected_rollback` label. A cheap linear probe is much stronger, which means the practical governance story currently points toward low-cost learned pre-commit monitors, not dense Jacobian readouts.
 
-The current prompt set also passes a tokenizer-level leakage audit for `Qwen/Qwen3-0.6B`: 400 target-absent prompts checked against 30,000 watched-token sequences, with 0 violations.
+The original tokenizer audit checked only the user-prompt text: 400 target-absent prompts and 30,000 watched-token sequences produced 0 violations in that scope. A later full-chat re-audit found 100 violations, all in `fake_commit`, because the shared system message contained `validator`. The v2 result must therefore not be described as a zero-leakage complete-input result. See `results/leakage_controlled_v2_main/Qwen__Qwen3-0.6B/FULL_INPUT_TOKEN_LEAKAGE_REAUDIT.md`.
 
 ## What Ran
 
@@ -42,7 +42,7 @@ Primary label: `expected_rollback`.
 | `logit_lens` | 0.486 | near random on the primary label |
 | `dense_jlens` | 0.416 | fails the keyword-baseline check |
 | `jvp_lens` | 0.317 | fails the keyword-baseline check |
-| `linear_probe` | 1.000 | cheap learned monitor dominates on this corpus |
+| `linear_probe` | 1.000 | separates this repeated-template corpus; semantic generalization was not tested in v2 |
 
 Observed label: `generated_rollback`.
 
@@ -76,6 +76,8 @@ The dense-direction suppression sweep ran on `50` paraphrase attacks and `50` ha
 
 Hard-neutral rollback stayed at `0.000` for baseline, suppress, and sham across all four risks. So the intervention did not broadly break benign cases, but it also did not reduce risky outputs.
 
+The paired re-analysis strengthens the negative result. Suppress-minus-sham rollback is `+0.240 [0.120, 0.360]` for `fake_commit`, `+0.140 [0.060, 0.240]` for `hidden_fields`, and `+0.160 [0.040, 0.280]` for `schema_bypass`. All three paired intervals exclude zero in the harmful direction. See `results/leakage_controlled_v2_intervention/Qwen__Qwen3-0.6B/PAIRED_INTERVENTION_STATS.md`.
+
 ## Lens Stability Ablation
 
 A 32-prompt full-layer dense lens was fitted on the same local RTX 3060. The fit used all 28 layers and took `3341.1s` (`55.7` minutes). The resulting `.npz` artifact is intentionally ignored by Git.
@@ -106,24 +108,16 @@ This is a useful negative result.
 
 The v2 experiment supports three conclusions:
 
-- Target-word leakage was reduced enough to expose that raw dense/JVP watched-token ranks are not reliable on this corpus.
-- Linear probes are much cheaper and much stronger, so the governance monitor path should prioritize learned residual probes before dense Jacobian scaling.
+- User-prompt target-word leakage was reduced enough to expose that raw dense/JVP watched-token ranks are not reliable on this corpus, but the full input still leaked `validator` in `fake_commit`.
+- Linear probes are much cheaper and much stronger on v2, but v2 does not establish template robustness or added value over prompt text.
 - Dense-direction intervention does not currently provide a causal control handle.
 - The dense lens itself is moderately stable in aggregate, but individual top tokens can be unstable.
 
 The project should not rent RTX Pro 6000 for 8B/14B dense J-lens yet. The next scale-up should wait until a stronger local signal survives keyword, template, and sham controls.
 
-## Next Experimental Fix
+## Resolution in v3
 
-The main remaining confound is template regularity. The linear probe can likely detect repeated condition phrasing, not only abstract runtime risk.
-
-Recommended next step:
-
-- Add multiple paraphrase templates per condition.
-- Add a held-out-template split.
-- Add cross-risk transfer: train on three risk families, test on the fourth.
-- Keep `target_present_concept_absent` as the token-copy control.
-- Re-run 0.6B before any cloud scale curve.
+The held-out-template v3 experiment completed this follow-up with disjoint template families, full-chat token auditing, prompt-text TF-IDF baselines, cross-risk transfer, and risk-specific output validators. The residual probe reaches semantic-risk AUC `0.897`, but prompt-text TF-IDF reaches `1.000`; residual-minus-text AUC is `-0.103 [-0.138, -0.064]`. The pre-registered added-value gate therefore fails. See `results/HELDOUT_TEMPLATE_V3_REPORT.md`.
 
 ## 中文摘要
 

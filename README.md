@@ -18,7 +18,9 @@ This project is not a full reproduction of Anthropic's Global Workspace result. 
 - A static Hugging Face Space is available at <https://sunny114514-precommit-lens.static.hf.space>.
 - An isolated multimodel extension has been run for `Qwen/Qwen3.5-0.8B` and `unsloth/gemma-3-270m-it`; see `results/MULTIMODEL_EXPERIMENT_SUMMARY.md`.
 - The earlier `early_spoiler_attack` rank-1 readout is now treated as a historical pilot result, not as primary evidence, because the target token was present in the prompt.
-- A tokenizer-audited leakage-controlled v2 falsification run is now complete on Qwen3-0.6B; see `results/LEAKAGE_CONTROLLED_V2_REPORT.md` and `results/auc_by_category.md`. The result is negative for raw dense/JVP readouts as practical monitors: linear probes are much stronger and cheaper on this corpus.
+- The pre-registered held-out-template v3 run is complete on Qwen3-0.6B. The residual probe generalizes (`AUC 0.897`) but loses to prompt-text TF-IDF (`AUC 1.000`); residual-minus-text AUC is `-0.103 [-0.138, -0.064]`. See `results/HELDOUT_TEMPLATE_V3_REPORT.md`.
+- The v2 `0/30,000` token audit covered user prompts only. A full-chat re-audit found 100 `fake_commit` leaks from the shared system message; v3's full-chat audit is `0/36,000`.
+- The pre-registered v4 trajectory run is complete: 1,088 fresh trajectories over 34 fixed prompts. All 9 test prompts remained outcome-divergent, but the residual added-value gate failed. At checkpoint 8, layer-18 residual AUC is `0.823` versus visible-prefix TF-IDF `0.817`; the paired advantage is only `+0.006 [0.000, 0.017]`, below the frozen `+0.03` margin. See `results/trajectory_v4_confirmatory/Qwen__Qwen3-0.6B/V4_CONFIRMATORY_RESULTS.md`.
 
 ## Motivation
 
@@ -39,14 +41,29 @@ configs/
   dense_jlens_qwen_prompts.yaml      # Qwen3 dense J-lens prompt pairs
   jacobian_prompt_sets.yaml          # Earlier JVP pilot prompts
   prompt_sets.yaml                   # Logit-lens pilot prompts
+  prompt_set_v3_heldout_templates.yaml
+  trajectory_confirmatory_v4.yaml
+
+data/prompt_sets/
+  heldout_templates_v3.jsonl         # 960-case held-out-template corpus
+  trajectory_confirmatory_v4.jsonl   # 34 frozen trajectory prompts
 
 src/
   run_dense_jlens_qwen.py            # Full dense Jacobian-lens runner
   run_jacobian_vector_probe.py       # Finite-difference JVP baseline
   run_probe.py                       # Logit-lens baseline
-  summarize_jacobian_runs.py         # Cross-model JVP summarizer
+  build_heldout_template_prompts.py  # v3 corpus and full-chat audit builder
+  evaluate_probe_auc.py              # Unified readout/probe evaluator
+  analyze_v3_falsification.py        # Text baselines and clustered statistics
+  run_trajectory_sampling.py         # Divergent sampling and residual capture
+  analyze_v4_trajectories.py         # Within-prompt AUC and frozen v4 gate
+  run_v4_prefix_judge.py             # Strong visible-prefix baseline
 
 results/
+  HELDOUT_TEMPLATE_V3_REPORT.md
+  PREREGISTERED_V3_PROTOCOL.md
+  PREREGISTERED_V4_CONFIRMATORY_PROTOCOL.md
+  TRAJECTORY_V4_DISCOVERY_REPORT.md
   QWEN3_DENSE_JLENS_INTERPRETATION.md
   dense_jlens_qwen_fulllayers_4fit/
     Qwen__Qwen3-0.6B/
@@ -81,8 +98,8 @@ Interpretation:
 
 - This table is retained for provenance only; it predates the leakage-controlled v2 corpus.
 - The rank-1 early-spoiler case is not primary evidence because the target token was present in the prompt.
-- The current evidence should be read from `results/auc_by_category.md` and `results/LEAKAGE_CONTROLLED_V2_REPORT.md`.
-- On v2, raw dense/JVP watched-token readouts do not beat the keyword baseline on the primary AUC metric.
+- The current evidence should be read from `results/HELDOUT_TEMPLATE_V3_REPORT.md`.
+- On v3, overall dense/JVP semantic-risk AUC is near chance (`0.498` / `0.481`).
 
 See [results/QWEN3_DENSE_JLENS_INTERPRETATION.md](results/QWEN3_DENSE_JLENS_INTERPRETATION.md) for the historical pilot interpretation.
 
@@ -188,29 +205,70 @@ It does **not** yet provide:
 - Workspace census or reportability tests
 - Claims about model consciousness or a global workspace
 
-## Leakage-Controlled v2 Result
+## Held-Out-Template v3 Result
 
-The v2 falsification stage builds 800 matched prompts across four runtime risks and four leakage conditions. On Qwen3-0.6B:
+v3 contains 960 cases across four risks, 12 complete phrasing families per risk, and four matched concept/target-token conditions. Entire template families are held out from probe training and layer selection. The model's complete rendered chat input, including the system message, passes a `0/36,000` watched-sequence audit.
 
-- `dense_jlens` AUC on `expected_rollback`: `0.416`
-- selected-layer `jvp_lens` AUC on `expected_rollback`: `0.317`
-- `keyword_hit_count` AUC on `expected_rollback`: `0.625`
-- held-out `linear_probe` AUC on `expected_rollback`: `1.000`
-- held-out `linear_probe` AUC on `generated_rollback`: `0.886`
-- tokenizer-level target-absent leakage audit: `0` violations across `30,000` watched-token sequences
-- 4-fit vs 32-fit dense-lens stability: mean Spearman `0.895`, top-1 agreement `0.700`
+Primary held-out test results:
 
-Dense-direction suppression did not reduce risky rollback more than sham. This blocks the cloud scale-up path for now and shifts the next experiment toward stronger prompt controls and cheap residual probes.
+| method | semantic-risk AUC | generated-policy AUC |
+|---|---:|---:|
+| `dense_jlens` | 0.498 | 0.500 |
+| selected-layer `jvp_lens` | 0.481 | 0.469 |
+| residual `linear_probe` | 0.897 | 0.918 |
+| leave-one-risk-out residual probe | 0.681 | 0.707 |
+| prompt-text TF-IDF | 1.000 | 0.990 |
 
-See:
+The residual probe passes the pre-registered template-generalization and generated-policy gates, but fails the internal added-value gate: its semantic AUC is `0.103` below the text baseline, with paired 95% CI `[-0.138, -0.064]`. The current prompts expose their risk intent at the text surface, so internal readout is unnecessary for this task.
 
-- `results/PREREGISTERED_EVALUATION_PROTOCOL.md`
-- `results/LEAKAGE_CONTROLLED_V2_REPORT.md`
-- `results/auc_by_category.md`
-- `results/leakage_controlled_v2_main/Qwen__Qwen3-0.6B/TOKEN_LEAKAGE_AUDIT.md`
-- `results/leakage_controlled_v2_main/Qwen__Qwen3-0.6B/FALSIFICATION_SUMMARY.md`
-- `results/leakage_controlled_v2_intervention/Qwen__Qwen3-0.6B/INTERVENTION_SUMMARY.md`
-- `results/dense_lens_stability_4fit_vs_32fit/Qwen__Qwen3-0.6B/LENS_STABILITY.md`
+Paired intervention statistics also reject the current suppression direction. Suppress-minus-sham rollback is positive for `fake_commit` (`+0.240 [0.120, 0.360]`), `hidden_fields` (`+0.140 [0.060, 0.240]`), and `schema_bypass` (`+0.160 [0.040, 0.280]`).
+
+The scale gate therefore remained closed: no Qwen3.5/Gemma v3 expansion and no cloud dense-Jacobian curve. v4 implements the distinct follow-up by holding prompts fixed and predicting divergent sampled trajectories from pre-landing generation checkpoints.
+
+See `results/PREREGISTERED_V3_PROTOCOL.md`, `results/HELDOUT_TEMPLATE_V3_REPORT.md`, and `results/heldout_templates_v3_analysis/Qwen__Qwen3-0.6B/V3_FALSIFICATION_REPORT.md`.
+
+The earlier v2 tables remain available for provenance in `results/LEAKAGE_CONTROLLED_V2_REPORT.md`; their zero-leakage statement is now explicitly scoped to user-prompt text.
+
+## Trajectory-Conditioned v4 Result
+
+v4 removes prompt identity as the outcome label by repeatedly sampling each fixed prompt and comparing compliant and violating trajectories within that prompt. Three disclosed discovery rounds selected 34 high-variance prompts across `early_spoiler`, `hidden_fields`, and `schema_bypass`; `fake_commit` was excluded because no candidate produced adequate within-prompt contrast. Discovery trajectories were never reused.
+
+The confirmatory run used 32 fresh seeds per prompt, template-family-disjoint 16/9/9 train/validation/test splits, fixed checkpoints, semantic policy landing, and 2,000 prompt-cluster bootstrap replicates. All frozen prompts remained mixed under fresh seeds.
+
+| checkpoint | residual L18 | visible-prefix TF-IDF | next-token stats | residual minus cheap envelope |
+|---:|---:|---:|---:|---:|
+| 2 | 0.527 | 0.558 | 0.500 | -0.031 [-0.095, 0.019] |
+| 4 | 0.580 | 0.610 | 0.512 | -0.030 [-0.093, 0.009] |
+| 6 | 0.676 | 0.661 | 0.449 | +0.015 [-0.095, 0.126] |
+| 8 | 0.823 | 0.817 | 0.545 | +0.006 [0.000, 0.017] |
+| 10 | 0.817 | 0.814 | 0.739 | +0.003 [0.000, 0.008] |
+
+The result is informative but negative: trajectory outcome becomes readable before policy landing, yet a shallow visible-prefix TF-IDF model extracts essentially the same signal. No checkpoint meets the frozen `+0.03` residual advantage, so no consecutive pair can pass the primary gate. This supports pre-landing monitoring as a task, but not an internal-state accessibility advantage on this model and selected corpus.
+
+Cost is not the failure mode. In 18 paired runs, six-layer/nine-checkpoint capture costs `1.014x` plain generation (95% CI `0.999-1.029`) with identical sampled tokens. Batched layer-18 classifier scoring is about `0.050` microseconds per row; the separate prefix judge costs `25.3` ms per unique prefix and still underperforms.
+
+![v4 pre-landing trajectory curve](results/trajectory_v4_confirmatory/Qwen__Qwen3-0.6B/v4_lead_curve.svg)
+
+See `results/PREREGISTERED_V4_CONFIRMATORY_PROTOCOL.md`, `results/TRAJECTORY_V4_DISCOVERY_REPORT.md`, and `results/trajectory_v4_confirmatory/Qwen__Qwen3-0.6B/V4_CONFIRMATORY_RESULTS.md`.
+
+Re-run the frozen confirmation after regenerating the discovery manifest:
+
+```powershell
+python .\src\run_trajectory_sampling.py `
+  --cases .\data\prompt_sets\trajectory_confirmatory_v4.jsonl `
+  --out-dir .\results\trajectory_v4_confirmatory `
+  --model-id Qwen/Qwen3-0.6B `
+  --conditions trajectory_ambiguous,trajectory_fair_choice,trajectory_calibrated_choice `
+  --samples-per-prompt 32 --seed-start 5000000 `
+  --temperature 0.8 --top-p 0.95 --max-new-tokens 48 `
+  --capture-checkpoints --checkpoints 0,2,4,6,8,10,12,16,24 `
+  --layers 0,6,12,18,24,27 --dtype float16
+
+python .\src\run_v4_prefix_judge.py
+python .\src\analyze_v4_trajectories.py `
+  --judge-scores .\results\trajectory_v4_confirmatory\Qwen__Qwen3-0.6B\prefix_judge_scores.jsonl
+python .\src\benchmark_v4_monitoring_cost.py
+```
 
 ## Planned Hugging Face Spaces Preview
 
@@ -237,9 +295,18 @@ The repository includes a minimal `app.py` for this future static preview path.
 - [x] Minimal pre-commit intervention sanity check
 - [x] Systematic suppress-vs-sham intervention sweep
 - [x] 32-prompt dense-lens stability ablation
-- [ ] Held-out-template leakage-controlled corpus
-- [ ] Cross-risk transfer probe evaluation
-- [ ] Hugging Face Spaces result browser
+- [x] Held-out-template leakage-controlled corpus
+- [x] Full-chat tokenizer leakage audit
+- [x] Prompt-text TF-IDF baselines
+- [x] Pair- and template-cluster confidence intervals
+- [x] Cross-risk transfer probe evaluation
+- [x] Risk-specific policy and structural validators
+- [x] Fixed-prompt divergent-trajectory discovery
+- [x] Semantic pre-landing token annotation
+- [x] Pre-registered within-prompt v4 evaluation
+- [x] Visible-prefix TF-IDF, next-token, and model-judge baselines
+- [x] Paired monitoring-cost benchmark
+- [x] Hugging Face Spaces result browser
 
 ## Acknowledgements
 

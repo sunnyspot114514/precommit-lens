@@ -17,9 +17,13 @@ short_description: Static PreCommitLens result browser.
 
 Static result browser for the PreCommitLens experiment.
 
-This Space does not download models, fit Jacobians, or run live inference. It only
+This Space does not download models, fit Jacobians, or run live inference. It
 serves precomputed dense Jacobian-lens summaries, paired attack/control deltas,
-and interpretation notes.
+and the pre-registered v4 fixed-prompt trajectory result.
+
+The v4 confirmatory run contains 1,088 fresh trajectories over 34 prompts. Its
+primary residual-added-value gate failed: internal residual prediction became
+accurate before policy landing, but a visible-prefix TF-IDF baseline matched it.
 
 For the full code and reproduction scripts, see the GitHub repository:
 

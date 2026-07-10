@@ -87,6 +87,8 @@
       font-size: 0.88rem;
       font-weight: 700;
       text-decoration: none;
+      flex-shrink: 0;
+      max-width: 100%;
     }
 
     .link-pill:hover {
@@ -110,6 +112,12 @@
       grid-template-columns: 318px minmax(0, 1fr);
       gap: 14px;
       align-items: start;
+    }
+
+    .layout > *,
+    .stack > *,
+    .viewer-grid > * {
+      min-width: 0;
     }
 
     .panel {
@@ -158,6 +166,8 @@
     }
 
     select {
+      min-width: 0;
+      max-width: 100%;
       min-height: 38px;
       border: 1px solid var(--line-strong);
       border-radius: 8px;
@@ -558,6 +568,56 @@
       font-weight: 700;
     }
 
+    .v4-summary {
+      margin-bottom: 14px;
+    }
+
+    .v4-headline {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .gate-fail {
+      border-color: #edb8c0;
+      background: #fff3f5;
+      color: var(--bad);
+    }
+
+    .v4-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 14px 0;
+    }
+
+    .v4-metric {
+      border-left: 3px solid var(--line-strong);
+      padding: 3px 10px;
+    }
+
+    .v4-metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .v4-metric strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 1.05rem;
+    }
+
+    .v4-figure {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
     @media (max-width: 1120px) {
       .layout,
       .viewer-grid,
@@ -580,8 +640,14 @@
       }
 
       .cards,
-      .kv {
+      .kv,
+      .v4-metrics {
         grid-template-columns: 1fr;
+      }
+
+      .panel-head {
+        align-items: flex-start;
+        flex-direction: column;
       }
     }
   </style>
@@ -612,6 +678,28 @@
       <span class="badge">1024 x 1024 dense Jacobians</span>
       <span class="badge">Static precomputed results</span>
       <span class="badge">No live inference</span>
+    </section>
+
+    <section class="panel v4-summary">
+      <div class="panel-head">
+        <div>
+          <h2>Confirmatory v4: fixed-prompt trajectory prediction</h2>
+          <p class="v4-headline">Fresh trajectories, semantic policy landing, within-prompt paired AUC, and frozen success criteria.</p>
+        </div>
+        <span class="badge gate-fail">Primary gate: FAIL</span>
+      </div>
+      <div class="panel-body">
+        <p class="v4-headline">
+          Outcome becomes readable before policy landing, but layer-18 residuals do not beat a shallow visible-prefix TF-IDF baseline by the pre-registered margin. This is an added-value failure, not a contrast-yield failure.
+        </p>
+        <div class="v4-metrics">
+          <div class="v4-metric"><span>Confirmatory data</span><strong>1,088 trajectories / 34 prompts</strong></div>
+          <div class="v4-metric"><span>Fresh test contrast</span><strong>9 / 9 prompts, 3 risks</strong></div>
+          <div class="v4-metric"><span>Checkpoint 8 AUC</span><strong>0.823 residual / 0.817 TF-IDF</strong></div>
+          <div class="v4-metric"><span>Capture cost</span><strong>1.014x plain generation</strong></div>
+        </div>
+        <img class="v4-figure" src="v4_lead_curve.svg" alt="v4 pre-landing AUC and residual advantage curve">
+      </div>
     </section>
 
     <div id="app" class="layout">
@@ -713,6 +801,8 @@
     const densePath = "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/dense_jlens_results.json";
     const pairPath = "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/paired_delta_summary.json";
     const reports = [
+      { label: "v4 Confirmatory", path: "v4_confirmatory_results.md" },
+      { label: "v4 Discovery", path: "v4_discovery_report.md" },
       { label: "Dense Summary", path: "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/dense_jlens_summary.md" },
       { label: "Paired Delta", path: "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/paired_delta_summary.md" },
       { label: "Interpretation", path: "results/QWEN3_DENSE_JLENS_INTERPRETATION.md" },
