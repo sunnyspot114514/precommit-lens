@@ -20,6 +20,7 @@ PreCommitLens 是一个轻量化 Jacobian-lens 复现实验，也是一个面向
 - v2 的 `0/30,000` token 审计只覆盖 user prompt。完整 chat 输入复审在共享 system message 中发现 100 个 `fake_commit` 泄漏；v3 的完整输入审计为 `0/36,000`。
 - 预注册的 v4 轨迹实验已经完成：34 个固定 prompt、1,088 条全新轨迹。9/9 个 test prompt 都保持轨迹分歧，但 residual 新增价值门槛失败。checkpoint 8 的 layer-18 residual AUC 为 `0.823`，可见前缀 TF-IDF 为 `0.817`；配对优势只有 `+0.006 [0.000, 0.017]`，低于冻结的 `+0.03` 门槛。详见 `results/trajectory_v4_confirmatory/Qwen__Qwen3-0.6B/V4_CONFIRMATORY_RESULTS.md`。
 - 预注册的 Qwen3-4B v4b 跨规模复现已经完成，并严格复用同一批冻结 prompt。只有 `2/34` 个 prompt 仍为 mixed，test 中仅 `1/9`，因此 probe 新增价值 gate 为 **inconclusive**。详见 `v4b_cross_scale_report.md`。
+- 预注册的 Qwen3-4B 原生 v4c discovery 也已完成。三种冻结机制的 192 个候选中只有 4 个进入 within-prompt 分歧区间，因此结果为 **DISCOVERY YIELD FAIL**，没有运行确认性 residual probe。详见 `v4c_discovery_report.md`。
 
 ## 背景与动机
 
@@ -269,9 +270,9 @@ python .\src\analyze_v4_trajectories.py `
 python .\src\benchmark_v4_monitoring_cost.py
 ```
 
-## Hugging Face Spaces 预览计划
+## Hugging Face Spaces 静态预览
 
-后续可以做一个免费的 Hugging Face Spaces 预览版。第一版不需要在线跑模型，也不需要 GPU，可以先做结果浏览器：
+免费的 Hugging Face Space 已作为静态结果浏览器部署，不会在线拟合模型或占用 GPU。当前它可以：
 
 - 展示 dense J-lens summary
 - 对比 attack/control cases
@@ -306,6 +307,7 @@ python .\src\benchmark_v4_monitoring_cost.py
 - [x] 可见前缀 TF-IDF、next-token 和 model-judge baseline
 - [x] 配对监控成本基准
 - [x] Hugging Face Spaces 结果浏览器
+- [x] Qwen3-4B 原生 v4c discovery 与 yield gate
 
 ## 致谢
 

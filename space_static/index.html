@@ -681,6 +681,7 @@
     <section class="badges" aria-label="Experiment facts">
       <span class="badge">Qwen/Qwen3-0.6B</span>
       <span class="badge">Qwen/Qwen3-4B trajectory v4b</span>
+      <span class="badge">Qwen3-4B-native discovery v4c</span>
       <span class="badge">28 layers</span>
       <span class="badge">1024 x 1024 dense Jacobians</span>
       <span class="badge">Static precomputed results</span>
@@ -726,6 +727,27 @@
           <div class="v4-metric"><span>Fresh test contrast</span><strong>1 / 9 prompts, 1 risk</strong></div>
           <div class="v4-metric"><span>Prompt collapse</span><strong>32 / 34 single-outcome</strong></div>
           <div class="v4-metric"><span>RTX 3060 peak</span><strong>7.644 GiB allocated</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel v4-summary">
+      <div class="panel-head">
+        <div>
+          <h2>Discovery v4c: Qwen3-4B-native contrast search</h2>
+          <p class="v4-headline">Three mechanisms, 192 frozen candidates, and a pre-registered yield gate.</p>
+        </div>
+        <span class="badge gate-fail">Discovery gate: YIELD FAIL</span>
+      </div>
+      <div class="panel-body">
+        <p class="v4-headline">
+          A 4B-native redesign still did not produce enough within-prompt outcome contrast. The protocol therefore stopped before residual capture or probe fitting; this is a discovery-yield result, not evidence that residual probes fail at 4B.
+        </p>
+        <div class="v4-metrics">
+          <div class="v4-metric"><span>Discovery data</span><strong>3,072 trajectories / 192 prompts</strong></div>
+          <div class="v4-metric"><span>Eligible by round</span><strong>3 / 1 / 0 of 64</strong></div>
+          <div class="v4-metric"><span>Lottery diagnostic</span><strong>95.8% chose larger weight</strong></div>
+          <div class="v4-metric"><span>RTX 3060 peak</span><strong>7.592 GiB allocated</strong></div>
         </div>
       </div>
     </section>
@@ -829,6 +851,7 @@
     const densePath = "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/dense_jlens_results.json";
     const pairPath = "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/paired_delta_summary.json";
     const reports = [
+      { label: "v4c Discovery", path: "v4c_discovery_report.md" },
       { label: "v4b Cross-Scale", path: "v4b_cross_scale_report.md" },
       { label: "v4 Confirmatory", path: "v4_confirmatory_results.md" },
       { label: "v4 Discovery", path: "v4_discovery_report.md" },

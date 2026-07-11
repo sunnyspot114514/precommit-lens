@@ -20,6 +20,7 @@ PreCommitLens 是一个轻量化 Jacobian-lens 复现实验，也是一个面向
 - v2 的 `0/30,000` token 审计只覆盖 user prompt。完整 chat 输入复审在共享 system message 中发现 100 个 `fake_commit` 泄漏；v3 的完整输入审计为 `0/36,000`。
 - 预注册的 v4 轨迹实验已经完成：34 个固定 prompt、1,088 条全新轨迹。9/9 个 test prompt 都保持轨迹分歧，但 residual 新增价值门槛失败。checkpoint 8 的 layer-18 residual AUC 为 `0.823`，可见前缀 TF-IDF 为 `0.817`；配对优势只有 `+0.006 [0.000, 0.017]`，低于冻结的 `+0.03` 门槛。详见 `results/trajectory_v4_confirmatory/Qwen__Qwen3-0.6B/V4_CONFIRMATORY_RESULTS.md`。
 - 预注册的 Qwen3-4B v4b 跨规模复现已经完成，并严格复用同一批冻结 prompt。轨迹分歧没有迁移：只有 `2/34` 个 prompt 仍为 mixed，test 中仅 `1/9` 且只覆盖一个风险，因此 accessibility gate 在 probe 比较前即为 **inconclusive**。详见 `results/V4_V4B_CROSS_SCALE_REPORT.md`。
+- 预注册的 4B 原生 v4c discovery 也已完成。三种冻结机制分别只得到 `3/64`、`1/64` 和 `0/64` 个 eligible prompt，因此最终门槛为 **DISCOVERY YIELD FAIL**，没有拟合确认性 residual probe。详见 `results/V4C_DISCOVERY_FINAL_REPORT.md`。
 
 ## 背景与动机
 
@@ -43,10 +44,12 @@ configs/
   prompt_set_v3_heldout_templates.yaml
   trajectory_confirmatory_v4.yaml
   trajectory_confirmatory_v4b.yaml
+  trajectory_discovery_v4c_manifest.yaml
 
 data/prompt_sets/
   heldout_templates_v3.jsonl         # 960-case held-out-template 语料
   trajectory_confirmatory_v4.jsonl   # 34 个冻结的轨迹 prompt
+  trajectory_candidates_v4c_round*.jsonl
 
 src/
   run_dense_jlens_qwen.py            # full dense Jacobian-lens 主脚本
@@ -59,13 +62,17 @@ src/
   analyze_v4_trajectories.py         # within-prompt AUC 与冻结 gate
   run_v4_prefix_judge.py             # 强可见前缀 baseline
   summarize_v4_cross_scale.py        # 冻结 prompt 的跨规模迁移报告
+  evaluate_v4c_discovery.py          # 冻结的顺序 discovery gate
+  summarize_v4c_discovery.py         # v4c 完整性与 yield 最终报告
 
 results/
   HELDOUT_TEMPLATE_V3_REPORT.md
   PREREGISTERED_V3_PROTOCOL.md
   PREREGISTERED_V4_CONFIRMATORY_PROTOCOL.md
   PREREGISTERED_V4B_CROSS_SCALE_PROTOCOL.md
+  PREREGISTERED_V4C_DISCOVERY_PROTOCOL.md
   V4_V4B_CROSS_SCALE_REPORT.md
+  V4C_DISCOVERY_FINAL_REPORT.md
   TRAJECTORY_V4_DISCOVERY_REPORT.md
   QWEN3_DENSE_JLENS_INTERPRETATION.md
   dense_jlens_qwen_fulllayers_4fit/
@@ -269,6 +276,22 @@ v4b 只改变了模型和按深度归一化后的捕获层：使用 Qwen3-4B FP1
 
 详见 `results/PREREGISTERED_V4B_CROSS_SCALE_PROTOCOL.md`、`results/V4_V4B_CROSS_SCALE_REPORT.md` 和 `results/trajectory_v4b_confirmatory/Qwen__Qwen3-4B/V4B_CONFIRMATORY_RESULTS.md`。
 
+## Qwen3-4B 原生 v4c Discovery 结果
+
+v4c 检验 v4b 无法识别的一个独立问题：为 Qwen3-4B 重新构造 discovery pool 后，能否找到足够多的 within-prompt 合规/违规分歧轨迹，从而合法进行 residual accessibility 实验？三轮候选 prompt 和停止规则都在采样前冻结，分别使用同等权威冲突、边界取舍和显式加权抽样；每轮 64 个 prompt、1,024 条轨迹。
+
+| 轮次 | 机制 | eligible prompt | always commit / rollback / mixed |
+|---:|---|---:|---:|
+| 1 | 同等权威冲突 | 3/64 | 25 / 24 / 15 |
+| 2 | 边界取舍 | 1/64 | 29 / 28 / 7 |
+| 3 | 加权抽样 | 0/64 | 29 / 33 / 2 |
+
+只有 `4/192` 个 prompt 满足冻结的 `[0.20, 0.80]` 违规率区间，远低于“至少 30 个 prompt、24 个模板族，且至少三类风险得到充足覆盖”的预注册门槛，因此结果是 **DISCOVERY YIELD FAIL**。按协议，没有继续运行确认性 residual capture 或 probe 拟合。
+
+一项明确标注为 post-discovery 的诊断有助于理解第三轮：在非平权的 lottery prompt 上，Qwen3-4B 在 `736/768` 条精确候选输出中选择了声明权重更大的候选（`95.8%`），但没有任何 prompt 进入 eligible 区间。该现象与“近似确定性地选择更大权重项”一致，而不像重复的随机抽样。它不能证明模型普遍具有确定性，也不能回答 residual probe 在有效 4B 对照语料上是否有新增价值。
+
+完整 3,072 条轨迹的 FP16 discovery 在 RTX 3060 上的最大 allocated VRAM 为 `7.592 GiB`。详见 `results/PREREGISTERED_V4C_DISCOVERY_PROTOCOL.md` 和 `results/V4C_DISCOVERY_FINAL_REPORT.md`。
+
 在重新生成 discovery manifest 后，可按冻结参数复跑确认性实验：
 
 ```powershell
@@ -288,9 +311,9 @@ python .\src\analyze_v4_trajectories.py `
 python .\src\benchmark_v4_monitoring_cost.py
 ```
 
-## Hugging Face Spaces 预览计划
+## Hugging Face Spaces 静态预览
 
-后续可以做一个免费的 Hugging Face Spaces 预览版。第一版不需要在线跑模型，也不需要 GPU，可以先做结果浏览器：
+免费的 Hugging Face Space 已作为静态结果浏览器部署，不会在线拟合模型或占用 GPU。当前它可以：
 
 - 展示 dense J-lens summary
 - 对比 attack/control cases
@@ -298,7 +321,7 @@ python .\src\benchmark_v4_monitoring_cost.py
 - 解释 validator 为什么 commit 或 rollback
 - 展示 paired-delta 表格和 intervention sanity-check JSON
 
-仓库里已经包含一个最小 `app.py`，后续可以直接扩展成在线预览。
+仓库已包含部署中的 `space_static/` 静态资源，以及用于兼容的最小 `app.py` 入口。
 
 ## 后续计划
 
@@ -325,6 +348,7 @@ python .\src\benchmark_v4_monitoring_cost.py
 - [x] 可见前缀 TF-IDF、next-token 和 model-judge baseline
 - [x] 配对监控成本基准
 - [x] 预注册 Qwen3-4B 冻结 prompt 跨规模复现
+- [x] 预注册 Qwen3-4B 原生 v4c discovery 与 yield gate
 - [x] Hugging Face Spaces 结果浏览器
 
 ## 致谢

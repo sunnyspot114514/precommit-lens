@@ -20,7 +20,7 @@ Static result browser for the PreCommitLens experiment.
 
 This Space does not download models, fit Jacobians, or run live inference. It
 serves precomputed dense Jacobian-lens summaries, paired attack/control deltas,
-and the pre-registered v4/v4b fixed-prompt trajectory results.
+and the pre-registered v4/v4b/v4c trajectory results.
 
 The v4 confirmatory run contains 1,088 fresh trajectories over 34 prompts. Its
 primary residual-added-value gate failed: internal residual prediction became
@@ -30,6 +30,11 @@ The frozen-prompt Qwen3-4B replication is inconclusive for probe added value:
 only 2/34 prompts remain outcome-divergent, including 1/9 test prompts. This
 shows that the 0.6B contrast-selected benchmark does not directly transfer as a
 4B scale point.
+
+The separately pre-registered Qwen3-4B-native v4c discovery also stopped at its
+yield gate. Only 4/192 candidates reached the frozen within-prompt contrast
+interval across three mechanisms, so no confirmatory residual probe was fit.
+The complete 3,072-trajectory report is available in the viewer.
 
 For the full code and reproduction scripts, see the GitHub repository:
 

@@ -22,6 +22,7 @@ This project is not a full reproduction of Anthropic's Global Workspace result. 
 - The v2 `0/30,000` token audit covered user prompts only. A full-chat re-audit found 100 `fake_commit` leaks from the shared system message; v3's full-chat audit is `0/36,000`.
 - The pre-registered v4 trajectory run is complete: 1,088 fresh trajectories over 34 fixed prompts. All 9 test prompts remained outcome-divergent, but the residual added-value gate failed. At checkpoint 8, layer-18 residual AUC is `0.823` versus visible-prefix TF-IDF `0.817`; the paired advantage is only `+0.006 [0.000, 0.017]`, below the frozen `+0.03` margin. See `results/trajectory_v4_confirmatory/Qwen__Qwen3-0.6B/V4_CONFIRMATORY_RESULTS.md`.
 - The pre-registered Qwen3-4B v4b replication is complete on the same frozen prompts. Contrast does not transfer: only `2/34` prompts remain mixed, including `1/9` test prompts from one risk, so the accessibility gate is **inconclusive** before probe comparison. See `results/V4_V4B_CROSS_SCALE_REPORT.md`.
+- The pre-registered 4B-native v4c discovery is also complete. Three frozen mechanisms yielded only `3/64`, `1/64`, and `0/64` eligible prompts, so the final gate is **DISCOVERY YIELD FAIL** and no confirmatory residual probe was fit. See `results/V4C_DISCOVERY_FINAL_REPORT.md`.
 
 ## Motivation
 
@@ -45,10 +46,12 @@ configs/
   prompt_set_v3_heldout_templates.yaml
   trajectory_confirmatory_v4.yaml
   trajectory_confirmatory_v4b.yaml
+  trajectory_discovery_v4c_manifest.yaml
 
 data/prompt_sets/
   heldout_templates_v3.jsonl         # 960-case held-out-template corpus
   trajectory_confirmatory_v4.jsonl   # 34 frozen trajectory prompts
+  trajectory_candidates_v4c_round*.jsonl
 
 src/
   run_dense_jlens_qwen.py            # Full dense Jacobian-lens runner
@@ -61,13 +64,17 @@ src/
   analyze_v4_trajectories.py         # Within-prompt AUC and frozen v4 gate
   run_v4_prefix_judge.py             # Strong visible-prefix baseline
   summarize_v4_cross_scale.py        # Frozen-prompt scale-transfer report
+  evaluate_v4c_discovery.py          # Frozen sequential discovery gate
+  summarize_v4c_discovery.py         # Final v4c integrity and yield report
 
 results/
   HELDOUT_TEMPLATE_V3_REPORT.md
   PREREGISTERED_V3_PROTOCOL.md
   PREREGISTERED_V4_CONFIRMATORY_PROTOCOL.md
   PREREGISTERED_V4B_CROSS_SCALE_PROTOCOL.md
+  PREREGISTERED_V4C_DISCOVERY_PROTOCOL.md
   V4_V4B_CROSS_SCALE_REPORT.md
+  V4C_DISCOVERY_FINAL_REPORT.md
   TRAJECTORY_V4_DISCOVERY_REPORT.md
   QWEN3_DENSE_JLENS_INTERPRETATION.md
   dense_jlens_qwen_fulllayers_4fit/
@@ -271,6 +278,22 @@ The full FP16 run fits locally on the RTX 3060: six-layer capture peaked at `7.6
 
 See `results/PREREGISTERED_V4B_CROSS_SCALE_PROTOCOL.md`, `results/V4_V4B_CROSS_SCALE_REPORT.md`, and `results/trajectory_v4b_confirmatory/Qwen__Qwen3-4B/V4B_CONFIRMATORY_RESULTS.md`.
 
+## Qwen3-4B-Native v4c Discovery Result
+
+v4c asked the distinct, pre-registered question left unidentified by v4b: can a new Qwen3-4B-native discovery pool produce enough within-prompt compliant/violating trajectories for a valid residual-accessibility experiment? All three candidate rounds and stopping rules were frozen before sampling. They used equal-authority conflicts, boundary tradeoffs, and an explicit weighted-lottery calibration, with 64 prompts and 1,024 trajectories per round.
+
+| round | mechanism | eligible prompts | always commit / rollback / mixed |
+|---:|---|---:|---:|
+| 1 | equal-authority conflict | 3/64 | 25 / 24 / 15 |
+| 2 | boundary tradeoff | 1/64 | 29 / 28 / 7 |
+| 3 | weighted lottery | 0/64 | 29 / 33 / 2 |
+
+Only `4/192` prompts met the frozen `[0.20, 0.80]` violation-rate rule, versus the required 30 prompts across at least 24 families and three adequately represented risks. The gate therefore ended in **DISCOVERY YIELD FAIL**. Per protocol, no confirmatory residual capture or probe fitting was run.
+
+A disclosed post-discovery diagnostic helps explain round three: for non-tie lottery prompts, Qwen3-4B selected the candidate with the larger stated weight in `736/768` exact-candidate trajectories (`95.8%`), yet no prompt achieved eligible within-prompt contrast. This is consistent with near-deterministic larger-weight selection rather than repeated stochastic draws. It does not establish general model determinism or say whether residual probes would add value on a valid 4B contrastive population.
+
+The full 3,072-trajectory FP16 discovery used at most `7.592 GiB` allocated VRAM on the RTX 3060. See `results/PREREGISTERED_V4C_DISCOVERY_PROTOCOL.md` and `results/V4C_DISCOVERY_FINAL_REPORT.md`.
+
 Re-run the frozen confirmation after regenerating the discovery manifest:
 
 ```powershell
@@ -290,9 +313,9 @@ python .\src\analyze_v4_trajectories.py `
 python .\src\benchmark_v4_monitoring_cost.py
 ```
 
-## Planned Hugging Face Spaces Preview
+## Static Hugging Face Spaces Preview
 
-A free Hugging Face Spaces preview is planned. The first version should be a lightweight result browser, not a GPU-heavy online fitter:
+The free static Hugging Face Space is a result browser, not a GPU-heavy online fitter. It currently:
 
 - Show saved dense J-lens summaries
 - Compare attack/control cases
@@ -300,7 +323,7 @@ A free Hugging Face Spaces preview is planned. The first version should be a lig
 - Explain validator decisions
 - Show the paired-delta table and intervention sanity-check JSON
 
-The repository includes a minimal `app.py` for this future static preview path.
+The repository includes the deployed `space_static/` bundle and a minimal `app.py` compatibility entry point.
 
 ## Roadmap
 
@@ -327,6 +350,7 @@ The repository includes a minimal `app.py` for this future static preview path.
 - [x] Visible-prefix TF-IDF, next-token, and model-judge baselines
 - [x] Paired monitoring-cost benchmark
 - [x] Pre-registered Qwen3-4B frozen-prompt cross-scale replication
+- [x] Pre-registered Qwen3-4B-native v4c discovery and yield gate
 - [x] Hugging Face Spaces result browser
 
 ## Acknowledgements
