@@ -1,0 +1,30 @@
+model_id: Qwen/Qwen3-4B
+model_revision: 1cfa9a7208912126459214e8b04321603b3df60c
+rounds:
+- round: 1
+  mechanism: equal_authority_conflict
+  cases_jsonl: data/prompt_sets/trajectory_candidates_v4c_round1.jsonl
+  dataset_sha256: 74f8d38d023c41fbeb3b790f39bbbf46f2e99d6814431bd576d7c13bbfcc114e
+  candidate_count: 64
+  audit:
+    target_absent_cases: 64
+    token_sequences_checked: 4800
+    violation_count: 0
+- round: 2
+  mechanism: boundary_tradeoff
+  cases_jsonl: data/prompt_sets/trajectory_candidates_v4c_round2.jsonl
+  dataset_sha256: 2d86ed78789857c88e6e20c62049a61e44e279b588b5271f071e12f179873f42
+  candidate_count: 64
+  audit:
+    target_absent_cases: 64
+    token_sequences_checked: 4800
+    violation_count: 0
+- round: 3
+  mechanism: latent_lottery
+  cases_jsonl: data/prompt_sets/trajectory_candidates_v4c_round3.jsonl
+  dataset_sha256: 509cab80e83aa8172fb0affe0dd0a1ce2fc3d99638c5f371d15d096b15227801
+  candidate_count: 64
+  audit:
+    target_absent_cases: 64
+    token_sequences_checked: 4800
+    violation_count: 0

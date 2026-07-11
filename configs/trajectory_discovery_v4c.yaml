@@ -1,0 +1,52 @@
+experiment: trajectory_discovery_v4c
+claim: qwen3_4b_native_selected_population_accessibility
+model_id: Qwen/Qwen3-4B
+model_revision: 1cfa9a7208912126459214e8b04321603b3df60c
+dtype: float16
+rounds:
+- round: 1
+  mechanism: equal_authority_conflict
+  cases_jsonl: data/prompt_sets/trajectory_candidates_v4c_round1.jsonl
+  dataset_sha256: 74f8d38d023c41fbeb3b790f39bbbf46f2e99d6814431bd576d7c13bbfcc114e
+  seed_start: 11000000
+- round: 2
+  mechanism: boundary_tradeoff
+  cases_jsonl: data/prompt_sets/trajectory_candidates_v4c_round2.jsonl
+  dataset_sha256: 2d86ed78789857c88e6e20c62049a61e44e279b588b5271f071e12f179873f42
+  seed_start: 12000000
+- round: 3
+  mechanism: latent_lottery
+  cases_jsonl: data/prompt_sets/trajectory_candidates_v4c_round3.jsonl
+  dataset_sha256: 509cab80e83aa8172fb0affe0dd0a1ce2fc3d99638c5f371d15d096b15227801
+  seed_start: 13000000
+sampling:
+  samples_per_prompt: 16
+  temperature: 0.8
+  top_p: 0.95
+  max_new_tokens: 48
+  max_seq_len: 256
+  screen_min_rate: 0.2
+  screen_max_rate: 0.8
+selection:
+  maximum_prompts_per_template_family: 2
+  maximum_prompts_per_family_mechanism: 1
+  rank_by_distance_to_half: true
+  mechanism_tiebreak_order:
+  - equal_authority_conflict
+  - boundary_tradeoff
+  - latent_lottery
+gate:
+  minimum_selected_prompts: 30
+  minimum_prompts_per_passing_risk: 8
+  minimum_passing_risks: 3
+  minimum_template_families: 24
+  minimum_mechanisms: 2
+  minimum_non_lottery_prompts: 12
+  maximum_rounds: 3
+confirmation:
+  samples_per_prompt: 32
+  seed_start: 15000000
+  primary_layer: 23
+  minimum_auc_advantage: 0.03
+  minimum_mixed_test_prompts: 6
+  minimum_mixed_test_risks: 2
