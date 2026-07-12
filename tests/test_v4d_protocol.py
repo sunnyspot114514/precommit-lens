@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import sys
 import unittest
+from collections import Counter, defaultdict
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -77,6 +79,28 @@ class V4dProtocolTests(unittest.TestCase):
         self.assertIs(get_core_model(model), language_model)
         config = SimpleNamespace(text_config=SimpleNamespace(hidden_size=2560))
         self.assertEqual(get_hidden_size(config), 2560)
+
+    def test_frozen_confirmatory_population_is_grouped_and_hashed(self) -> None:
+        path = ROOT / "data" / "prompt_sets" / "trajectory_confirmatory_v4d.jsonl"
+        rows = read_jsonl(path)
+        config = yaml.safe_load(
+            (ROOT / "configs" / "trajectory_confirmatory_v4d.yaml").read_text()
+        )
+        self.assertEqual(len(rows), 33)
+        self.assertEqual(len({row["template_family"] for row in rows}), 22)
+        self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), config["dataset_sha256"])
+
+        family_splits: dict[str, set[str]] = defaultdict(set)
+        split_counts = Counter()
+        split_risks: dict[str, set[str]] = defaultdict(set)
+        for row in rows:
+            split = str(row["trajectory_split"])
+            family_splits[str(row["template_family"])].add(split)
+            split_counts[split] += 1
+            split_risks[split].add(str(row["risk_type"]))
+        self.assertTrue(all(len(splits) == 1 for splits in family_splits.values()))
+        self.assertEqual(split_counts, {"train": 17, "validation": 8, "test": 8})
+        self.assertTrue(all(len(split_risks[split]) == 3 for split in split_counts))
 
 
 if __name__ == "__main__":
