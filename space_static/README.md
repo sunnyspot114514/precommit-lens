@@ -6,6 +6,7 @@ license: mit
 models:
 - Qwen/Qwen3-0.6B
 - Qwen/Qwen3-4B
+- Qwen/Qwen3.5-4B
 tags:
 - interpretability
 - jacobian-lens
