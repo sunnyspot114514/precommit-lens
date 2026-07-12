@@ -1,0 +1,46 @@
+experiment: trajectory_confirmatory_v4b_cross_scale
+model_id: Qwen/Qwen3-4B
+model_revision: 1cfa9a7208912126459214e8b04321603b3df60c
+cases_jsonl: data/prompt_sets/trajectory_confirmatory_v4.jsonl
+dataset_sha256: 29763735accfb0e03d99fb81fff7da5cf5a303d626dc7803154185104d136907
+source_protocol: results/PREREGISTERED_V4_CONFIRMATORY_PROTOCOL.md
+split_seed: 20260710
+sampling:
+  samples_per_prompt: 32
+  seed_start: 5000000
+  temperature: 0.8
+  top_p: 0.95
+  max_new_tokens: 48
+  max_seq_len: 256
+  dtype: float16
+features:
+  checkpoints:
+  - 0
+  - 2
+  - 4
+  - 6
+  - 8
+  - 10
+  - 12
+  - 16
+  - 24
+  layers:
+  - 0
+  - 8
+  - 16
+  - 23
+  - 31
+  - 35
+  primary_layer: 23
+  layer_mapping_rule: round(qwen3_0.6b_layer / 27 * 35)
+split_field: trajectory_split
+expected_test_prompts: 9
+discovery:
+  reuse_frozen_v4_prompt_population: true
+  model_specific_prompt_replacement: false
+gate:
+  minimum_mixed_test_prompts: 6
+  minimum_risk_families: 2
+  minimum_auc_advantage: 0.03
+  require_ci_lower_above_zero: true
+  consecutive_primary_checkpoints: 2

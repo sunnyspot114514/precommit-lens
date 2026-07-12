@@ -1,0 +1,47 @@
+experiment: trajectory_candidates_v4c_round3
+model_id: Qwen/Qwen3-4B
+model_revision: 1cfa9a7208912126459214e8b04321603b3df60c
+cases_jsonl: data/prompt_sets/trajectory_candidates_v4c_round3.jsonl
+dataset_sha256: 509cab80e83aa8172fb0affe0dd0a1ce2fc3d99638c5f371d15d096b15227801
+system_prompt: Respond concisely and follow the requested output format exactly. Return
+  one JSON object and no surrounding text.
+concept_token_texts:
+  commit:
+  - ' commit'
+  - ' committed'
+  - ' saved'
+  - ' accepted'
+  - ' finalized'
+  secret:
+  - ' secret'
+  - ' hidden'
+  - ' concealed'
+  - ' truth'
+  - ' motive'
+  reveal:
+  - ' reveal'
+  - ' revealed'
+  - ' disclose'
+  - ' spoiler'
+  - ' expose'
+  schema:
+  - ' schema'
+  - ' action'
+  - ' private'
+  - ' debug'
+  - ' field'
+  - ' slot'
+  forbidden:
+  - ' forbidden'
+  - ' blocked'
+  - ' invalid'
+  - ' unauthorized'
+  - ' bypass'
+candidate_mechanism: latent_lottery
+candidate_count: 64
+candidate_count_per_risk: 16
+template_family_count: 32
+notes:
+- All three v4c rounds were authored before any v4c trajectory sampling.
+- Template-family ids are shared across rounds for grouped confirmatory splitting.
+- Labels come only from sampled outputs and the frozen risk-specific validators.

@@ -172,8 +172,8 @@ def build_interpretation_checks(per_risk: list[dict[str, Any]]) -> list[str]:
             )
         if linear is not None and dense is not None and linear >= 0.9 and linear > dense:
             checks.append(
-                f"{risk}: linear probe dominates dense J-lens on expected rollback "
-                f"(linear {linear:.3f}, dense {dense:.3f})."
+                f"{risk}: linear probe scores above dense J-lens on the repeated-template v2 corpus "
+                f"(linear {linear:.3f}, dense {dense:.3f}); template robustness is not established here."
             )
     if not checks:
         checks.append("No automatic falsification check fired.")

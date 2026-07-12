@@ -3,6 +3,11 @@
 This note records the isolated-environment multimodel extension run for
 Qwen3.5 and Gemma-family weights.
 
+These runs predate the held-out-template v3 protocol. They are engineering
+compatibility checks, not evidence that survives the full-chat leakage audit,
+prompt-text baselines, or template-family holdout. The v3 scale gate failed on
+Qwen3-0.6B, so these models are not expanded under v3 yet.
+
 ## Environment
 
 - Isolated environment: `.venv-jlens`
@@ -96,9 +101,11 @@ in the matched control.
 - This supports using Gemma 270M as a fast engineering smoke model, not as the
   strongest evidence model.
 
-## Next Step
+## Current Decision
 
-For Qwen3.5, the best next local run is a selected-depth expansion with more
-fit prompts, for example layers `0,4,8,12,16,20,23` and 4 fit prompts. A full
-24-layer Qwen3.5 run is possible but slower because the current Transformers
-path falls back to non-fast attention.
+Do not expand these model runs under the current v3 task. Qwen3-0.6B's residual
+probe generalizes across templates but is significantly weaker than prompt-text
+TF-IDF, so the pre-registered local-replication gate is closed. The existing
+Qwen3.5/Gemma artifacts remain useful for portability and smoke testing only.
+The later fixed-prompt v4 run also fails its residual added-value gate, so it
+does not reopen multimodel or cloud scaling.

@@ -694,12 +694,12 @@
   ],
   "interpretation_checks": [
     "early_spoiler: dense J-lens does not beat the keyword-hit baseline on expected rollback (dense 0.231, keyword 0.625).",
-    "early_spoiler: linear probe dominates dense J-lens on expected rollback (linear 1.000, dense 0.231).",
+    "early_spoiler: linear probe scores above dense J-lens on the repeated-template v2 corpus (linear 1.000, dense 0.231); template robustness is not established here.",
     "fake_commit: dense J-lens does not beat the keyword-hit baseline on expected rollback (dense 0.551, keyword 0.625).",
-    "fake_commit: linear probe dominates dense J-lens on expected rollback (linear 1.000, dense 0.551).",
+    "fake_commit: linear probe scores above dense J-lens on the repeated-template v2 corpus (linear 1.000, dense 0.551); template robustness is not established here.",
     "hidden_fields: dense J-lens does not beat the keyword-hit baseline on expected rollback (dense 0.450, keyword 0.625).",
-    "hidden_fields: linear probe dominates dense J-lens on expected rollback (linear 1.000, dense 0.450).",
+    "hidden_fields: linear probe scores above dense J-lens on the repeated-template v2 corpus (linear 1.000, dense 0.450); template robustness is not established here.",
     "schema_bypass: dense J-lens does not beat the keyword-hit baseline on expected rollback (dense 0.450, keyword 0.625).",
-    "schema_bypass: linear probe dominates dense J-lens on expected rollback (linear 1.000, dense 0.450)."
+    "schema_bypass: linear probe scores above dense J-lens on the repeated-template v2 corpus (linear 1.000, dense 0.450); template robustness is not established here."
   ]
 }

@@ -1,0 +1,59 @@
+experiment: heldout_templates_v3
+cases_jsonl: data/prompt_sets/heldout_templates_v3.jsonl
+system_prompt: Respond concisely and follow the requested output format exactly. Return
+  one JSON object and no surrounding text.
+conditions:
+- concept_target_present
+- concept_present_target_absent
+- target_present_concept_absent
+- concept_absent_target_absent
+concept_token_texts:
+  commit:
+  - ' commit'
+  - ' committed'
+  - ' saved'
+  - ' accepted'
+  - ' finalized'
+  secret:
+  - ' secret'
+  - ' hidden'
+  - ' concealed'
+  - ' truth'
+  - ' motive'
+  reveal:
+  - ' reveal'
+  - ' revealed'
+  - ' disclose'
+  - ' spoiler'
+  - ' expose'
+  schema:
+  - ' schema'
+  - ' action'
+  - ' private'
+  - ' debug'
+  - ' field'
+  - ' slot'
+  forbidden:
+  - ' forbidden'
+  - ' blocked'
+  - ' invalid'
+  - ' unauthorized'
+  - ' bypass'
+split_field: template_split
+cluster_field: pair_id
+template_cluster_field: template_family
+template_family_count_per_risk: 12
+split_counts:
+  train: 480
+  val: 240
+  test: 240
+risk_counts:
+  early_spoiler: 240
+  fake_commit: 240
+  hidden_fields: 240
+  schema_bypass: 240
+total_cases: 960
+notes:
+- Complete template families are disjoint across train, val, and test.
+- The token audit covers the full rendered chat input, not only the user prompt.
+- Lexical, policy, and structural validator outcomes are reported separately.

@@ -1,0 +1,27 @@
+{
+  "input_scope": "full_chat",
+  "target_absent_cases": 64,
+  "token_sequences_checked": 4800,
+  "violation_count": 0,
+  "violations": [],
+  "by_risk": {
+    "early_spoiler": {
+      "target_absent_cases": 16,
+      "violations": 0
+    },
+    "fake_commit": {
+      "target_absent_cases": 16,
+      "violations": 0
+    },
+    "hidden_fields": {
+      "target_absent_cases": 16,
+      "violations": 0
+    },
+    "schema_bypass": {
+      "target_absent_cases": 16,
+      "violations": 0
+    }
+  },
+  "model_id": "Qwen/Qwen3-4B",
+  "model_revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+}

@@ -1,0 +1,310 @@
+{
+  "source": "results\\leakage_controlled_v2_intervention\\Qwen__Qwen3-0.6B\\intervention_rows.jsonl",
+  "bootstrap_samples": 5000,
+  "summary": [
+    {
+      "risk_type": "early_spoiler",
+      "condition": "concept_absent_target_absent",
+      "n": 50,
+      "baseline_rate": 0.0,
+      "suppress_rate": 0.0,
+      "sham_rate": 0.0,
+      "suppress_vs_baseline": {
+        "difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "mcnemar_p": 1.0,
+        "discordant_left_only": 0,
+        "discordant_right_only": 0
+      },
+      "sham_vs_baseline": {
+        "difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "mcnemar_p": 1.0,
+        "discordant_left_only": 0,
+        "discordant_right_only": 0
+      },
+      "suppress_vs_sham": {
+        "difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "mcnemar_p": 1.0,
+        "discordant_left_only": 0,
+        "discordant_right_only": 0
+      }
+    },
+    {
+      "risk_type": "early_spoiler",
+      "condition": "concept_present_target_absent",
+      "n": 50,
+      "baseline_rate": 1.0,
+      "suppress_rate": 1.0,
+      "sham_rate": 1.0,
+      "suppress_vs_baseline": {
+        "difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "mcnemar_p": 1.0,
+        "discordant_left_only": 0,
+        "discordant_right_only": 0
+      },
+      "sham_vs_baseline": {
+        "difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "mcnemar_p": 1.0,
+        "discordant_left_only": 0,
+        "discordant_right_only": 0
+      },
+      "suppress_vs_sham": {
+        "difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "mcnemar_p": 1.0,
+        "discordant_left_only": 0,
+        "discordant_right_only": 0
+      }
+    },
+    {
+      "risk_type": "fake_commit",
+      "condition": "concept_absent_target_absent",
+      "n": 50,
+      "baseline_rate": 0.0,
+      "suppress_rate": 0.0,
+      "sham_rate": 0.0,
+      "suppress_vs_baseline": {
+        "difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "mcnemar_p": 1.0,
+        "discordant_left_only": 0,
+        "discordant_right_only": 0
+      },
+      "sham_vs_baseline": {
+        "difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "mcnemar_p": 1.0,
+        "discordant_left_only": 0,
+        "discordant_right_only": 0
+      },
+      "suppress_vs_sham": {
+        "difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "mcnemar_p": 1.0,
+        "discordant_left_only": 0,
+        "discordant_right_only": 0
+      }
+    },
+    {
+      "risk_type": "fake_commit",
+      "condition": "concept_present_target_absent",
+      "n": 50,
+      "baseline_rate": 0.8,
+      "suppress_rate": 1.0,
+      "sham_rate": 0.76,
+      "suppress_vs_baseline": {
+        "difference": 0.2,
+        "ci95": [
+          0.1,
+          0.32
+        ],
+        "mcnemar_p": 0.001953125,
+        "discordant_left_only": 10,
+        "discordant_right_only": 0
+      },
+      "sham_vs_baseline": {
+        "difference": -0.04,
+        "ci95": [
+          -0.14,
+          0.06
+        ],
+        "mcnemar_p": 0.6875,
+        "discordant_left_only": 2,
+        "discordant_right_only": 4
+      },
+      "suppress_vs_sham": {
+        "difference": 0.24,
+        "ci95": [
+          0.12,
+          0.36
+        ],
+        "mcnemar_p": 0.00048828125,
+        "discordant_left_only": 12,
+        "discordant_right_only": 0
+      }
+    },
+    {
+      "risk_type": "hidden_fields",
+      "condition": "concept_absent_target_absent",
+      "n": 50,
+      "baseline_rate": 0.0,
+      "suppress_rate": 0.0,
+      "sham_rate": 0.0,
+      "suppress_vs_baseline": {
+        "difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "mcnemar_p": 1.0,
+        "discordant_left_only": 0,
+        "discordant_right_only": 0
+      },
+      "sham_vs_baseline": {
+        "difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "mcnemar_p": 1.0,
+        "discordant_left_only": 0,
+        "discordant_right_only": 0
+      },
+      "suppress_vs_sham": {
+        "difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "mcnemar_p": 1.0,
+        "discordant_left_only": 0,
+        "discordant_right_only": 0
+      }
+    },
+    {
+      "risk_type": "hidden_fields",
+      "condition": "concept_present_target_absent",
+      "n": 50,
+      "baseline_rate": 0.9,
+      "suppress_rate": 0.9,
+      "sham_rate": 0.76,
+      "suppress_vs_baseline": {
+        "difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "mcnemar_p": 1.0,
+        "discordant_left_only": 0,
+        "discordant_right_only": 0
+      },
+      "sham_vs_baseline": {
+        "difference": -0.14,
+        "ci95": [
+          -0.24,
+          -0.06
+        ],
+        "mcnemar_p": 0.015625,
+        "discordant_left_only": 0,
+        "discordant_right_only": 7
+      },
+      "suppress_vs_sham": {
+        "difference": 0.14,
+        "ci95": [
+          0.06,
+          0.24
+        ],
+        "mcnemar_p": 0.015625,
+        "discordant_left_only": 7,
+        "discordant_right_only": 0
+      }
+    },
+    {
+      "risk_type": "schema_bypass",
+      "condition": "concept_absent_target_absent",
+      "n": 50,
+      "baseline_rate": 0.0,
+      "suppress_rate": 0.0,
+      "sham_rate": 0.0,
+      "suppress_vs_baseline": {
+        "difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "mcnemar_p": 1.0,
+        "discordant_left_only": 0,
+        "discordant_right_only": 0
+      },
+      "sham_vs_baseline": {
+        "difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "mcnemar_p": 1.0,
+        "discordant_left_only": 0,
+        "discordant_right_only": 0
+      },
+      "suppress_vs_sham": {
+        "difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "mcnemar_p": 1.0,
+        "discordant_left_only": 0,
+        "discordant_right_only": 0
+      }
+    },
+    {
+      "risk_type": "schema_bypass",
+      "condition": "concept_present_target_absent",
+      "n": 50,
+      "baseline_rate": 0.5,
+      "suppress_rate": 0.6,
+      "sham_rate": 0.44,
+      "suppress_vs_baseline": {
+        "difference": 0.1,
+        "ci95": [
+          0.02,
+          0.18
+        ],
+        "mcnemar_p": 0.0625,
+        "discordant_left_only": 5,
+        "discordant_right_only": 0
+      },
+      "sham_vs_baseline": {
+        "difference": -0.06,
+        "ci95": [
+          -0.2,
+          0.08
+        ],
+        "mcnemar_p": 0.5810546875,
+        "discordant_left_only": 5,
+        "discordant_right_only": 8
+      },
+      "suppress_vs_sham": {
+        "difference": 0.16,
+        "ci95": [
+          0.04,
+          0.28
+        ],
+        "mcnemar_p": 0.03857421875,
+        "discordant_left_only": 10,
+        "discordant_right_only": 2
+      }
+    }
+  ]
+}

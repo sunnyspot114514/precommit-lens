@@ -4,6 +4,7 @@ __pycache__/
 .venv/
 .venv-*/
 .vendor-qwen/
+.tools/
 .env
 
 # Local model and lens artifacts
@@ -16,6 +17,7 @@ __pycache__/
 .cache/
 data/lens/
 data/corpus/
+case_scores_with_text.jsonl
 
 # OS / editor files
 .DS_Store

@@ -1,0 +1,482 @@
+{
+  "analysis_status": "posthoc_mechanistic_diagnostic_no_gate_change",
+  "primary_layer": 21,
+  "checkpoint_rows": [
+    {
+      "checkpoint": 0,
+      "evaluable_test_prompts": 8,
+      "evaluable_test_risks": 3,
+      "identical_prefix_prompts": 8,
+      "identical_primary_feature_prompts": 8,
+      "identical_all_layer_feature_prompts": 8,
+      "maximum_primary_feature_span": 0.0,
+      "prompts": [
+        {
+          "case_id": "v4c_r1_early_spoiler_f05_v1",
+          "risk_type": "early_spoiler",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_early_spoiler_f07_v0",
+          "risk_type": "early_spoiler",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_fake_commit_f00_v0",
+          "risk_type": "fake_commit",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_fake_commit_f00_v1",
+          "risk_type": "fake_commit",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_fake_commit_f02_v1",
+          "risk_type": "fake_commit",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f04_v1",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f06_v0",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f06_v1",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        }
+      ]
+    },
+    {
+      "checkpoint": 2,
+      "evaluable_test_prompts": 8,
+      "evaluable_test_risks": 3,
+      "identical_prefix_prompts": 8,
+      "identical_primary_feature_prompts": 8,
+      "identical_all_layer_feature_prompts": 8,
+      "maximum_primary_feature_span": 0.0,
+      "prompts": [
+        {
+          "case_id": "v4c_r1_early_spoiler_f05_v1",
+          "risk_type": "early_spoiler",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_early_spoiler_f07_v0",
+          "risk_type": "early_spoiler",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_fake_commit_f00_v0",
+          "risk_type": "fake_commit",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_fake_commit_f00_v1",
+          "risk_type": "fake_commit",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_fake_commit_f02_v1",
+          "risk_type": "fake_commit",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f04_v1",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f06_v0",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f06_v1",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        }
+      ]
+    },
+    {
+      "checkpoint": 4,
+      "evaluable_test_prompts": 8,
+      "evaluable_test_risks": 3,
+      "identical_prefix_prompts": 8,
+      "identical_primary_feature_prompts": 8,
+      "identical_all_layer_feature_prompts": 8,
+      "maximum_primary_feature_span": 0.0,
+      "prompts": [
+        {
+          "case_id": "v4c_r1_early_spoiler_f05_v1",
+          "risk_type": "early_spoiler",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_early_spoiler_f07_v0",
+          "risk_type": "early_spoiler",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_fake_commit_f00_v0",
+          "risk_type": "fake_commit",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_fake_commit_f00_v1",
+          "risk_type": "fake_commit",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_fake_commit_f02_v1",
+          "risk_type": "fake_commit",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f04_v1",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f06_v0",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f06_v1",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        }
+      ]
+    },
+    {
+      "checkpoint": 6,
+      "evaluable_test_prompts": 5,
+      "evaluable_test_risks": 2,
+      "identical_prefix_prompts": 5,
+      "identical_primary_feature_prompts": 5,
+      "identical_all_layer_feature_prompts": 5,
+      "maximum_primary_feature_span": 0.0,
+      "prompts": [
+        {
+          "case_id": "v4c_r1_early_spoiler_f05_v1",
+          "risk_type": "early_spoiler",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_early_spoiler_f07_v0",
+          "risk_type": "early_spoiler",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f04_v1",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f06_v0",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f06_v1",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        }
+      ]
+    },
+    {
+      "checkpoint": 8,
+      "evaluable_test_prompts": 3,
+      "evaluable_test_risks": 1,
+      "identical_prefix_prompts": 3,
+      "identical_primary_feature_prompts": 3,
+      "identical_all_layer_feature_prompts": 3,
+      "maximum_primary_feature_span": 0.0,
+      "prompts": [
+        {
+          "case_id": "v4c_r1_hidden_fields_f04_v1",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f06_v0",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f06_v1",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        }
+      ]
+    },
+    {
+      "checkpoint": 10,
+      "evaluable_test_prompts": 3,
+      "evaluable_test_risks": 1,
+      "identical_prefix_prompts": 3,
+      "identical_primary_feature_prompts": 3,
+      "identical_all_layer_feature_prompts": 3,
+      "maximum_primary_feature_span": 0.0,
+      "prompts": [
+        {
+          "case_id": "v4c_r1_hidden_fields_f04_v1",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f06_v0",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f06_v1",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        }
+      ]
+    },
+    {
+      "checkpoint": 12,
+      "evaluable_test_prompts": 3,
+      "evaluable_test_risks": 1,
+      "identical_prefix_prompts": 3,
+      "identical_primary_feature_prompts": 3,
+      "identical_all_layer_feature_prompts": 3,
+      "maximum_primary_feature_span": 0.0,
+      "prompts": [
+        {
+          "case_id": "v4c_r1_hidden_fields_f04_v1",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f06_v0",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f06_v1",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        }
+      ]
+    },
+    {
+      "checkpoint": 16,
+      "evaluable_test_prompts": 3,
+      "evaluable_test_risks": 1,
+      "identical_prefix_prompts": 3,
+      "identical_primary_feature_prompts": 3,
+      "identical_all_layer_feature_prompts": 3,
+      "maximum_primary_feature_span": 0.0,
+      "prompts": [
+        {
+          "case_id": "v4c_r1_hidden_fields_f04_v1",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f06_v0",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f06_v1",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 1,
+          "primary_feature_max_span": 0.0,
+          "all_layer_feature_max_span": 0.0
+        }
+      ]
+    },
+    {
+      "checkpoint": 24,
+      "evaluable_test_prompts": 2,
+      "evaluable_test_risks": 1,
+      "identical_prefix_prompts": 0,
+      "identical_primary_feature_prompts": 0,
+      "identical_all_layer_feature_prompts": 0,
+      "maximum_primary_feature_span": 8.66015625,
+      "prompts": [
+        {
+          "case_id": "v4c_r1_hidden_fields_f06_v0",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 2,
+          "primary_feature_max_span": 8.66015625,
+          "all_layer_feature_max_span": 30.40625
+        },
+        {
+          "case_id": "v4c_r1_hidden_fields_f06_v1",
+          "risk_type": "hidden_fields",
+          "available_trajectories": 32,
+          "unique_visible_prefixes": 2,
+          "primary_feature_max_span": 8.337890625,
+          "all_layer_feature_max_span": 29.8408203125
+        }
+      ]
+    }
+  ],
+  "cross_label_first_difference": {
+    "at_landing": 1014,
+    "before_landing": 714
+  },
+  "cross_label_first_difference_by_risk": {
+    "early_spoiler": {
+      "at_landing": 412
+    },
+    "fake_commit": {
+      "at_landing": 602
+    },
+    "hidden_fields": {
+      "before_landing": 714
+    }
+  },
+  "prelanding_lead_tokens": {
+    "2": 714
+  },
+  "policy_landing_tokens_by_risk": {
+    "early_spoiler": {
+      "8": 180
+    },
+    "fake_commit": {
+      "5": 180
+    },
+    "hidden_fields": {
+      "23": 28,
+      "24": 92,
+      "25": 41
+    }
+  },
+  "gate_changed": false,
+  "new_checkpoint_sampled": false
+}

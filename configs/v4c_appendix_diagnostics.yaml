@@ -1,0 +1,66 @@
+experiment: v4c_posthoc_appendix_diagnostics
+status: posthoc_appendix_no_new_gate
+source_cases:
+  path: data/prompt_sets/trajectory_candidates_v4c_round1.jsonl
+  sha256: 74f8d38d023c41fbeb3b790f39bbbf46f2e99d6814431bd576d7c13bbfcc114e
+  prompt_count: 64
+  mechanism: equal_authority_conflict
+shared_outcomes:
+  samples_per_prompt: 16
+  max_new_tokens: 48
+  eligible_min_rate: 0.2
+  eligible_max_rate: 0.8
+  report:
+  - eligible_prompt_count
+  - always_commit_prompt_count
+  - always_rollback_prompt_count
+  - mixed_prompt_count
+  - exact_candidate_rate
+  - risk_specific_counts
+temperature_diagnostic:
+  model_id: Qwen/Qwen3-4B
+  model_revision: 1cfa9a7208912126459214e8b04321603b3df60c
+  backend: transformers
+  dtype: float16
+  fixed_top_p: 0.95
+  conditions:
+  - temperature: 0.8
+    seed_start: 11000000
+    source: results/trajectory_v4c_discovery_round1/Qwen__Qwen3-4B
+    reuse_existing: true
+  - temperature: 1.2
+    seed_start: 21000000
+    out_dir: results/trajectory_v4c_appendix_temperature_t1p2
+  - temperature: 1.5
+    seed_start: 22000000
+    out_dir: results/trajectory_v4c_appendix_temperature_t1p5
+cross_model_diagnostic:
+  backend: ollama
+  ollama_version: 0.31.2
+  temperature: 0.8
+  top_p: 0.95
+  top_k: 50
+  repeat_penalty: 1.0
+  presence_penalty: 0.0
+  frequency_penalty: 0.0
+  num_ctx: 512
+  think: false
+  models:
+  - model_id: gemma4:e2b
+    role: cross_family
+    expected_digest: 7fbdbf8f5e45a75bb122155ed546e765b4d9c53a1285f62fd9f506baa1c5a47e
+    expected_quantization: Q4_K_M
+    seed_start: 31000000
+    out_dir: results/trajectory_v4c_appendix_gemma4_e2b
+  - model_id: qwen3.5:4b
+    role: same_family_new_generation
+    expected_digest: 2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd
+    expected_quantization: Q4_K_M
+    seed_start: 32000000
+    out_dir: results/trajectory_v4c_appendix_qwen35_4b
+stopping:
+  run_all_four_new_conditions: true
+  no_additional_temperature: true
+  no_cross_model_round2: true
+  no_confirmatory_probe: true
+  no_new_success_gate: true

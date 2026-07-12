@@ -87,6 +87,8 @@
       font-size: 0.88rem;
       font-weight: 700;
       text-decoration: none;
+      flex-shrink: 0;
+      max-width: 100%;
     }
 
     .link-pill:hover {
@@ -110,6 +112,12 @@
       grid-template-columns: 318px minmax(0, 1fr);
       gap: 14px;
       align-items: start;
+    }
+
+    .layout > *,
+    .stack > *,
+    .viewer-grid > * {
+      min-width: 0;
     }
 
     .panel {
@@ -158,6 +166,8 @@
     }
 
     select {
+      min-width: 0;
+      max-width: 100%;
       min-height: 38px;
       border: 1px solid var(--line-strong);
       border-radius: 8px;
@@ -558,6 +568,62 @@
       font-weight: 700;
     }
 
+    .v4-summary {
+      margin-bottom: 14px;
+    }
+
+    .v4-headline {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .gate-fail {
+      border-color: #edb8c0;
+      background: #fff3f5;
+      color: var(--bad);
+    }
+
+    .gate-inconclusive {
+      border-color: #e7ca79;
+      background: #fff9e8;
+      color: #735d00;
+    }
+
+    .v4-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 14px 0;
+    }
+
+    .v4-metric {
+      border-left: 3px solid var(--line-strong);
+      padding: 3px 10px;
+    }
+
+    .v4-metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .v4-metric strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 1.05rem;
+    }
+
+    .v4-figure {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
     @media (max-width: 1120px) {
       .layout,
       .viewer-grid,
@@ -580,8 +646,14 @@
       }
 
       .cards,
-      .kv {
+      .kv,
+      .v4-metrics {
         grid-template-columns: 1fr;
+      }
+
+      .panel-head {
+        align-items: flex-start;
+        flex-direction: column;
       }
     }
   </style>
@@ -608,10 +680,122 @@
   <main class="wrap">
     <section class="badges" aria-label="Experiment facts">
       <span class="badge">Qwen/Qwen3-0.6B</span>
+      <span class="badge">Qwen/Qwen3-4B trajectory v4b</span>
+      <span class="badge">Qwen3-4B-native discovery v4c</span>
+      <span class="badge">Gemma E2B / Qwen3.5 appendix</span>
+      <span class="badge">Qwen3.5-4B confirmatory v4d</span>
       <span class="badge">28 layers</span>
       <span class="badge">1024 x 1024 dense Jacobians</span>
       <span class="badge">Static precomputed results</span>
       <span class="badge">No live inference</span>
+    </section>
+
+    <section class="panel v4-summary">
+      <div class="panel-head">
+        <div>
+          <h2>Confirmatory v4: fixed-prompt trajectory prediction</h2>
+          <p class="v4-headline">Fresh trajectories, semantic policy landing, within-prompt paired AUC, and frozen success criteria.</p>
+        </div>
+        <span class="badge gate-fail">Primary gate: FAIL</span>
+      </div>
+      <div class="panel-body">
+        <p class="v4-headline">
+          Outcome becomes readable before policy landing, but layer-18 residuals do not beat a shallow visible-prefix TF-IDF baseline by the pre-registered margin. This is an added-value failure, not a contrast-yield failure.
+        </p>
+        <div class="v4-metrics">
+          <div class="v4-metric"><span>Confirmatory data</span><strong>1,088 trajectories / 34 prompts</strong></div>
+          <div class="v4-metric"><span>Fresh test contrast</span><strong>9 / 9 prompts, 3 risks</strong></div>
+          <div class="v4-metric"><span>Checkpoint 8 AUC</span><strong>0.823 residual / 0.817 TF-IDF</strong></div>
+          <div class="v4-metric"><span>Capture cost</span><strong>1.014x plain generation</strong></div>
+        </div>
+        <img class="v4-figure" src="v4_lead_curve.svg" alt="v4 pre-landing AUC and residual advantage curve">
+      </div>
+    </section>
+
+    <section class="panel v4-summary">
+      <div class="panel-head">
+        <div>
+          <h2>Confirmatory v4b: frozen-prompt scale transfer</h2>
+          <p class="v4-headline">Qwen3-4B FP16, the same 34 prompts and gate, and depth-normalized residual layers.</p>
+        </div>
+        <span class="badge gate-inconclusive">Primary gate: INCONCLUSIVE</span>
+      </div>
+      <div class="panel-body">
+        <p class="v4-headline">
+          The 0.6B contrast-selected prompts do not remain contrastive at 4B. With zero mixed training prompts and only one mixed test prompt, the residual-added-value comparison is unidentified rather than negative.
+        </p>
+        <div class="v4-metrics">
+          <div class="v4-metric"><span>Confirmatory data</span><strong>1,088 trajectories / 34 prompts</strong></div>
+          <div class="v4-metric"><span>Fresh test contrast</span><strong>1 / 9 prompts, 1 risk</strong></div>
+          <div class="v4-metric"><span>Prompt collapse</span><strong>32 / 34 single-outcome</strong></div>
+          <div class="v4-metric"><span>RTX 3060 peak</span><strong>7.644 GiB allocated</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel v4-summary">
+      <div class="panel-head">
+        <div>
+          <h2>Discovery v4c: Qwen3-4B-native contrast search</h2>
+          <p class="v4-headline">Three mechanisms, 192 frozen candidates, and a pre-registered yield gate.</p>
+        </div>
+        <span class="badge gate-fail">Discovery gate: YIELD FAIL</span>
+      </div>
+      <div class="panel-body">
+        <p class="v4-headline">
+          The frozen Qwen3-4B FP16 redesign did not produce enough within-prompt outcome contrast. The protocol therefore stopped before residual capture or probe fitting; this is a discovery-yield result, not evidence that residual probes fail at 4B.
+        </p>
+        <div class="v4-metrics">
+          <div class="v4-metric"><span>Discovery data</span><strong>3,072 trajectories / 192 prompts</strong></div>
+          <div class="v4-metric"><span>Eligible by round</span><strong>3 / 1 / 0 of 64</strong></div>
+          <div class="v4-metric"><span>Lottery diagnostic</span><strong>95.8% chose larger weight</strong></div>
+          <div class="v4-metric"><span>RTX 3060 peak</span><strong>7.592 GiB allocated</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel v4-summary">
+      <div class="panel-head">
+        <div>
+          <h2>Appendix: temperature and deployment sensitivity</h2>
+          <p class="v4-headline">Four frozen post-hoc conditions with no change to the completed v4c gate.</p>
+        </div>
+        <span class="badge">Appendix: COMPLETE</span>
+      </div>
+      <div class="panel-body">
+        <p class="v4-headline">
+          Higher temperature partially restores Qwen3-4B contrast but remains below the original yield threshold. Gemma E2B stays low-yield, while the Qwen3.5-4B deployment produces substantial within-prompt contrast. The paradigm is model- and sampling-dependent.
+        </p>
+        <div class="v4-metrics">
+          <div class="v4-metric"><span>Qwen3-4B eligible</span><strong>3 / 9 / 11 at T=0.8 / 1.2 / 1.5</strong></div>
+          <div class="v4-metric"><span>Gemma E2B</span><strong>3 / 64 eligible</strong></div>
+          <div class="v4-metric"><span>Qwen3.5-4B</span><strong>34 / 64 eligible</strong></div>
+          <div class="v4-metric"><span>Qwen3.5 A/B switch</span><strong>52 / 64 prompts</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel v4-summary">
+      <div class="panel-head">
+        <div>
+          <h2>Final v4d: Qwen3.5-4B FP16 accessibility</h2>
+          <p class="v4-headline">A pre-registered deployment transfer followed by a 1,056-trajectory confirmatory run.</p>
+        </div>
+        <span class="badge gate-fail">Primary gate: FAIL</span>
+      </div>
+      <div class="panel-body">
+        <p class="v4-headline">
+          Benchmark contrast survives the move from Ollama Q4_K_M to Transformers FP16, but every early residual and visible-prefix method remains exactly at chance. At checkpoints 0-16, compliant and violating trajectories have identical visible prefixes and identical captured residual states within each evaluable prompt.
+        </p>
+        <div class="v4-metrics">
+          <div class="v4-metric"><span>FP16 stage-one yield</span><strong>36 / 64 eligible</strong></div>
+          <div class="v4-metric"><span>Confirmatory data</span><strong>1,056 trajectories / 33 prompts</strong></div>
+          <div class="v4-metric"><span>Fresh test contrast</span><strong>8 / 8 prompts, 3 risks</strong></div>
+          <div class="v4-metric"><span>Primary AUC curve</span><strong>0.500 for every method</strong></div>
+          <div class="v4-metric"><span>Capture cost</span><strong>1.005x plain generation</strong></div>
+          <div class="v4-metric"><span>Stopping boundary</span><strong>No v4e</strong></div>
+        </div>
+      </div>
     </section>
 
     <div id="app" class="layout">
@@ -713,6 +897,12 @@
     const densePath = "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/dense_jlens_results.json";
     const pairPath = "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/paired_delta_summary.json";
     const reports = [
+      { label: "v4d Final", path: "v4d_final_report.md" },
+      { label: "v4c Appendix", path: "v4c_appendix_diagnostics.md" },
+      { label: "v4c Discovery", path: "v4c_discovery_report.md" },
+      { label: "v4b Cross-Scale", path: "v4b_cross_scale_report.md" },
+      { label: "v4 Confirmatory", path: "v4_confirmatory_results.md" },
+      { label: "v4 Discovery", path: "v4_discovery_report.md" },
       { label: "Dense Summary", path: "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/dense_jlens_summary.md" },
       { label: "Paired Delta", path: "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/paired_delta_summary.md" },
       { label: "Interpretation", path: "results/QWEN3_DENSE_JLENS_INTERPRETATION.md" },

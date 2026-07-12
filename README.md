@@ -18,7 +18,13 @@ This project is not a full reproduction of Anthropic's Global Workspace result. 
 - A static Hugging Face Space is available at <https://sunny114514-precommit-lens.static.hf.space>.
 - An isolated multimodel extension has been run for `Qwen/Qwen3.5-0.8B` and `unsloth/gemma-3-270m-it`; see `results/MULTIMODEL_EXPERIMENT_SUMMARY.md`.
 - The earlier `early_spoiler_attack` rank-1 readout is now treated as a historical pilot result, not as primary evidence, because the target token was present in the prompt.
-- A tokenizer-audited leakage-controlled v2 falsification run is now complete on Qwen3-0.6B; see `results/LEAKAGE_CONTROLLED_V2_REPORT.md` and `results/auc_by_category.md`. The result is negative for raw dense/JVP readouts as practical monitors: linear probes are much stronger and cheaper on this corpus.
+- The pre-registered held-out-template v3 run is complete on Qwen3-0.6B. The residual probe generalizes (`AUC 0.897`) but loses to prompt-text TF-IDF (`AUC 1.000`); residual-minus-text AUC is `-0.103 [-0.138, -0.064]`. See `results/HELDOUT_TEMPLATE_V3_REPORT.md`.
+- The v2 `0/30,000` token audit covered user prompts only. A full-chat re-audit found 100 `fake_commit` leaks from the shared system message; v3's full-chat audit is `0/36,000`.
+- The pre-registered v4 trajectory run is complete: 1,088 fresh trajectories over 34 fixed prompts. All 9 test prompts remained outcome-divergent, but the residual added-value gate failed. At checkpoint 8, layer-18 residual AUC is `0.823` versus visible-prefix TF-IDF `0.817`; the paired advantage is only `+0.006 [0.000, 0.017]`, below the frozen `+0.03` margin. See `results/trajectory_v4_confirmatory/Qwen__Qwen3-0.6B/V4_CONFIRMATORY_RESULTS.md`.
+- The pre-registered Qwen3-4B v4b replication is complete on the same frozen prompts. Contrast does not transfer: only `2/34` prompts remain mixed, including `1/9` test prompts from one risk, so the accessibility gate is **inconclusive** before probe comparison. See `results/V4_V4B_CROSS_SCALE_REPORT.md`.
+- The pre-registered 4B-native v4c discovery is also complete. Three frozen mechanisms yielded only `3/64`, `1/64`, and `0/64` eligible prompts, so the final gate is **DISCOVERY YIELD FAIL** and no confirmatory residual probe was fit. See `results/V4C_DISCOVERY_FINAL_REPORT.md`.
+- The frozen post-hoc appendix is complete. On Qwen3-4B, eligible round-one prompts rise from `3/64` at T=0.8 to `9/64` at T=1.2 and `11/64` at T=1.5, still below the original 30-prompt gate. At T=0.8, Ollama Q4_K_M controls yield `3/64` for `gemma4:e2b` and `34/64` for `qwen3.5:4b`. See `results/V4C_APPENDIX_DIAGNOSTICS.md`.
+- The final pre-registered v4d experiment is complete on `Qwen/Qwen3.5-4B` FP16. Stage 1 preserves high trajectory contrast (`36/64` eligible), enabling a 33-prompt confirmatory run with 1,056 fresh trajectories. All splits remain mixed, but residual, TF-IDF, next-token, and judge AUC are exactly `0.500` at every primary checkpoint, so the residual-accessibility gate **FAILS**. See `results/V4D_FINAL_REPORT.md`.
 
 ## Motivation
 
@@ -39,14 +45,54 @@ configs/
   dense_jlens_qwen_prompts.yaml      # Qwen3 dense J-lens prompt pairs
   jacobian_prompt_sets.yaml          # Earlier JVP pilot prompts
   prompt_sets.yaml                   # Logit-lens pilot prompts
+  prompt_set_v3_heldout_templates.yaml
+  trajectory_confirmatory_v4.yaml
+  trajectory_confirmatory_v4b.yaml
+  trajectory_discovery_v4c_manifest.yaml
+  v4c_appendix_diagnostics.yaml
+  trajectory_v4d.yaml
+  trajectory_confirmatory_v4d.yaml
+
+data/prompt_sets/
+  heldout_templates_v3.jsonl         # 960-case held-out-template corpus
+  trajectory_confirmatory_v4.jsonl   # 34 frozen trajectory prompts
+  trajectory_candidates_v4c_round*.jsonl
+  trajectory_confirmatory_v4d.jsonl  # 33 frozen Qwen3.5 prompts
 
 src/
   run_dense_jlens_qwen.py            # Full dense Jacobian-lens runner
   run_jacobian_vector_probe.py       # Finite-difference JVP baseline
   run_probe.py                       # Logit-lens baseline
-  summarize_jacobian_runs.py         # Cross-model JVP summarizer
+  build_heldout_template_prompts.py  # v3 corpus and full-chat audit builder
+  evaluate_probe_auc.py              # Unified readout/probe evaluator
+  analyze_v3_falsification.py        # Text baselines and clustered statistics
+  run_trajectory_sampling.py         # Divergent sampling and residual capture
+  analyze_v4_trajectories.py         # Within-prompt AUC and frozen v4 gate
+  run_v4_prefix_judge.py             # Strong visible-prefix baseline
+  summarize_v4_cross_scale.py        # Frozen-prompt scale-transfer report
+  evaluate_v4c_discovery.py          # Frozen sequential discovery gate
+  summarize_v4c_discovery.py         # Final v4c integrity and yield report
+  run_ollama_trajectory_sampling.py  # Digest-locked deployment-state sampler
+  summarize_v4c_appendix_diagnostics.py
+  evaluate_v4d_stage1.py             # Frozen FP16 transfer gate
+  freeze_v4d_confirmatory.py         # Grouped Qwen3.5 split freezer
+  analyze_v4d_prelanding_identity.py # Post-hoc identity diagnostic
+  summarize_v4d.py                   # Final cross-stage report
 
 results/
+  HELDOUT_TEMPLATE_V3_REPORT.md
+  PREREGISTERED_V3_PROTOCOL.md
+  PREREGISTERED_V4_CONFIRMATORY_PROTOCOL.md
+  PREREGISTERED_V4B_CROSS_SCALE_PROTOCOL.md
+  PREREGISTERED_V4C_DISCOVERY_PROTOCOL.md
+  PREREGISTERED_V4C_APPENDIX_DIAGNOSTICS.md
+  PREREGISTERED_V4D_PROTOCOL.md
+  PREREGISTERED_V4D_CONFIRMATORY_PROTOCOL.md
+  V4_V4B_CROSS_SCALE_REPORT.md
+  V4C_DISCOVERY_FINAL_REPORT.md
+  V4C_APPENDIX_DIAGNOSTICS.md
+  V4D_FINAL_REPORT.md
+  TRAJECTORY_V4_DISCOVERY_REPORT.md
   QWEN3_DENSE_JLENS_INTERPRETATION.md
   dense_jlens_qwen_fulllayers_4fit/
     Qwen__Qwen3-0.6B/
@@ -81,8 +127,8 @@ Interpretation:
 
 - This table is retained for provenance only; it predates the leakage-controlled v2 corpus.
 - The rank-1 early-spoiler case is not primary evidence because the target token was present in the prompt.
-- The current evidence should be read from `results/auc_by_category.md` and `results/LEAKAGE_CONTROLLED_V2_REPORT.md`.
-- On v2, raw dense/JVP watched-token readouts do not beat the keyword baseline on the primary AUC metric.
+- The current evidence should be read from `results/HELDOUT_TEMPLATE_V3_REPORT.md`.
+- On v3, overall dense/JVP semantic-risk AUC is near chance (`0.498` / `0.481`).
 
 See [results/QWEN3_DENSE_JLENS_INTERPRETATION.md](results/QWEN3_DENSE_JLENS_INTERPRETATION.md) for the historical pilot interpretation.
 
@@ -188,33 +234,149 @@ It does **not** yet provide:
 - Workspace census or reportability tests
 - Claims about model consciousness or a global workspace
 
-## Leakage-Controlled v2 Result
+## Held-Out-Template v3 Result
 
-The v2 falsification stage builds 800 matched prompts across four runtime risks and four leakage conditions. On Qwen3-0.6B:
+v3 contains 960 cases across four risks, 12 complete phrasing families per risk, and four matched concept/target-token conditions. Entire template families are held out from probe training and layer selection. The model's complete rendered chat input, including the system message, passes a `0/36,000` watched-sequence audit.
 
-- `dense_jlens` AUC on `expected_rollback`: `0.416`
-- selected-layer `jvp_lens` AUC on `expected_rollback`: `0.317`
-- `keyword_hit_count` AUC on `expected_rollback`: `0.625`
-- held-out `linear_probe` AUC on `expected_rollback`: `1.000`
-- held-out `linear_probe` AUC on `generated_rollback`: `0.886`
-- tokenizer-level target-absent leakage audit: `0` violations across `30,000` watched-token sequences
-- 4-fit vs 32-fit dense-lens stability: mean Spearman `0.895`, top-1 agreement `0.700`
+Primary held-out test results:
 
-Dense-direction suppression did not reduce risky rollback more than sham. This blocks the cloud scale-up path for now and shifts the next experiment toward stronger prompt controls and cheap residual probes.
+| method | semantic-risk AUC | generated-policy AUC |
+|---|---:|---:|
+| `dense_jlens` | 0.498 | 0.500 |
+| selected-layer `jvp_lens` | 0.481 | 0.469 |
+| residual `linear_probe` | 0.897 | 0.918 |
+| leave-one-risk-out residual probe | 0.681 | 0.707 |
+| prompt-text TF-IDF | 1.000 | 0.990 |
 
-See:
+The residual probe passes the pre-registered template-generalization and generated-policy gates, but fails the internal added-value gate: its semantic AUC is `0.103` below the text baseline, with paired 95% CI `[-0.138, -0.064]`. The current prompts expose their risk intent at the text surface, so internal readout is unnecessary for this task.
 
-- `results/PREREGISTERED_EVALUATION_PROTOCOL.md`
-- `results/LEAKAGE_CONTROLLED_V2_REPORT.md`
-- `results/auc_by_category.md`
-- `results/leakage_controlled_v2_main/Qwen__Qwen3-0.6B/TOKEN_LEAKAGE_AUDIT.md`
-- `results/leakage_controlled_v2_main/Qwen__Qwen3-0.6B/FALSIFICATION_SUMMARY.md`
-- `results/leakage_controlled_v2_intervention/Qwen__Qwen3-0.6B/INTERVENTION_SUMMARY.md`
-- `results/dense_lens_stability_4fit_vs_32fit/Qwen__Qwen3-0.6B/LENS_STABILITY.md`
+Paired intervention statistics also reject the current suppression direction. Suppress-minus-sham rollback is positive for `fake_commit` (`+0.240 [0.120, 0.360]`), `hidden_fields` (`+0.140 [0.060, 0.240]`), and `schema_bypass` (`+0.160 [0.040, 0.280]`).
 
-## Planned Hugging Face Spaces Preview
+The scale gate therefore remained closed: no Qwen3.5/Gemma v3 expansion and no cloud dense-Jacobian curve. v4 implements the distinct follow-up by holding prompts fixed and predicting divergent sampled trajectories from pre-landing generation checkpoints.
 
-A free Hugging Face Spaces preview is planned. The first version should be a lightweight result browser, not a GPU-heavy online fitter:
+See `results/PREREGISTERED_V3_PROTOCOL.md`, `results/HELDOUT_TEMPLATE_V3_REPORT.md`, and `results/heldout_templates_v3_analysis/Qwen__Qwen3-0.6B/V3_FALSIFICATION_REPORT.md`.
+
+The earlier v2 tables remain available for provenance in `results/LEAKAGE_CONTROLLED_V2_REPORT.md`; their zero-leakage statement is now explicitly scoped to user-prompt text.
+
+## Trajectory-Conditioned v4 Result
+
+v4 removes prompt identity as the outcome label by repeatedly sampling each fixed prompt and comparing compliant and violating trajectories within that prompt. Three disclosed discovery rounds selected 34 high-variance prompts across `early_spoiler`, `hidden_fields`, and `schema_bypass`; `fake_commit` was excluded because no candidate produced adequate within-prompt contrast. Discovery trajectories were never reused.
+
+The confirmatory run used 32 fresh seeds per prompt, template-family-disjoint 16/9/9 train/validation/test splits, fixed checkpoints, semantic policy landing, and 2,000 prompt-cluster bootstrap replicates. All frozen prompts remained mixed under fresh seeds.
+
+| checkpoint | residual L18 | visible-prefix TF-IDF | next-token stats | residual minus cheap envelope |
+|---:|---:|---:|---:|---:|
+| 2 | 0.527 | 0.558 | 0.500 | -0.031 [-0.095, 0.019] |
+| 4 | 0.580 | 0.610 | 0.512 | -0.030 [-0.093, 0.009] |
+| 6 | 0.676 | 0.661 | 0.449 | +0.015 [-0.095, 0.126] |
+| 8 | 0.823 | 0.817 | 0.545 | +0.006 [0.000, 0.017] |
+| 10 | 0.817 | 0.814 | 0.739 | +0.003 [0.000, 0.008] |
+
+The result is informative but negative: trajectory outcome becomes readable before policy landing, yet a shallow visible-prefix TF-IDF model extracts essentially the same signal. No checkpoint meets the frozen `+0.03` residual advantage, so no consecutive pair can pass the primary gate. This supports pre-landing monitoring as a task, but not an internal-state accessibility advantage on this model and selected corpus.
+
+Cost is not the failure mode. In 18 paired runs, six-layer/nine-checkpoint capture costs `1.014x` plain generation (95% CI `0.999-1.029`) with identical sampled tokens. Batched layer-18 classifier scoring is about `0.050` microseconds per row; the separate prefix judge costs `25.3` ms per unique prefix and still underperforms.
+
+![v4 pre-landing trajectory curve](results/trajectory_v4_confirmatory/Qwen__Qwen3-0.6B/v4_lead_curve.svg)
+
+See `results/PREREGISTERED_V4_CONFIRMATORY_PROTOCOL.md`, `results/TRAJECTORY_V4_DISCOVERY_REPORT.md`, and `results/trajectory_v4_confirmatory/Qwen__Qwen3-0.6B/V4_CONFIRMATORY_RESULTS.md`.
+
+## Frozen-Prompt Cross-Scale v4b Result
+
+v4b changed only the monitored model and depth-normalized layer set: Qwen3-4B FP16 with layers `0, 8, 16, 23, 31, 35`, where layer 23 is the pre-registered counterpart of Qwen3-0.6B layer 18. The exact 34 prompts, splits, seeds, validator, landing rules, baselines, and `+0.03` gate were retained.
+
+| model | train mixed | validation mixed | test mixed | gate |
+|---|---:|---:|---:|---|
+| Qwen3-0.6B | 16/16, 3 risks | 9/9, 3 risks | 9/9, 3 risks | **FAIL**: no residual added value |
+| Qwen3-4B | 0/16 | 1/9, 1 risk | 1/9, 1 risk | **INCONCLUSIVE**: insufficient contrast |
+
+On Qwen3-4B, 19 prompts always commit, 13 always roll back, and only 2 remain mixed. With zero mixed training prompts, the pre-registered within-prompt residual, TF-IDF, and next-token classifiers cannot be fit. This does **not** show that residual probes fail at 4B; it shows that the contrast-selected 0.6B benchmark does not transfer as a valid 4B scale point. Replacing prompts after observing this collapse would change the estimand.
+
+The full FP16 run fits locally on the RTX 3060: six-layer capture peaked at `7.644 GiB` allocated, generated `21.231` tokens/s, and cost `1.026x` plain generation (95% CI `1.016-1.037`) with identical paired outputs. No cloud GPU was required.
+
+See `results/PREREGISTERED_V4B_CROSS_SCALE_PROTOCOL.md`, `results/V4_V4B_CROSS_SCALE_REPORT.md`, and `results/trajectory_v4b_confirmatory/Qwen__Qwen3-4B/V4B_CONFIRMATORY_RESULTS.md`.
+
+## Qwen3-4B-Native v4c Discovery Result
+
+v4c asked the distinct, pre-registered question left unidentified by v4b: can a new Qwen3-4B-native discovery pool produce enough within-prompt compliant/violating trajectories for a valid residual-accessibility experiment? All three candidate rounds and stopping rules were frozen before sampling. They used equal-authority conflicts, boundary tradeoffs, and an explicit weighted-lottery calibration, with 64 prompts and 1,024 trajectories per round.
+
+| round | mechanism | eligible prompts | always commit / rollback / mixed |
+|---:|---|---:|---:|
+| 1 | equal-authority conflict | 3/64 | 25 / 24 / 15 |
+| 2 | boundary tradeoff | 1/64 | 29 / 28 / 7 |
+| 3 | weighted lottery | 0/64 | 29 / 33 / 2 |
+
+Only `4/192` prompts met the frozen `[0.20, 0.80]` violation-rate rule, versus the required 30 prompts across at least 24 families and three adequately represented risks. The gate therefore ended in **DISCOVERY YIELD FAIL**. Per protocol, no confirmatory residual capture or probe fitting was run.
+
+A disclosed post-discovery diagnostic helps explain round three: for non-tie lottery prompts, Qwen3-4B selected the candidate with the larger stated weight in `736/768` exact-candidate trajectories (`95.8%`), yet no prompt achieved eligible within-prompt contrast. This is consistent with near-deterministic larger-weight selection rather than repeated stochastic draws. It does not establish general model determinism or say whether residual probes would add value on a valid 4B contrastive population.
+
+The full 3,072-trajectory FP16 discovery used at most `7.592 GiB` allocated VRAM on the RTX 3060. See `results/PREREGISTERED_V4C_DISCOVERY_PROTOCOL.md` and `results/V4C_DISCOVERY_FINAL_REPORT.md`.
+
+## v4c Post-Hoc Appendix Diagnostics
+
+The appendix protocol was committed before any appendix trajectory was sampled. It reuses the exact 64 round-one prompts and does not create a new gate, select a replacement pool, or authorize residual fitting.
+
+| model / setting | backend | eligible | always commit / rollback / mixed | exact A/B-switch prompts |
+|---|---|---:|---:|---:|
+| Qwen3-4B, T=0.8 | Transformers FP16 | 3/64 | 25 / 24 / 15 | 15/64 |
+| Qwen3-4B, T=1.2 | Transformers FP16 | 9/64 | 18 / 22 / 24 | 23/64 |
+| Qwen3-4B, T=1.5 | Transformers FP16 | 11/64 | 17 / 21 / 26 | 26/64 |
+| `gemma4:e2b`, T=0.8 | Ollama Q4_K_M | 3/64 | 29 / 25 / 10 | 6/64 |
+| `qwen3.5:4b`, T=0.8 | Ollama Q4_K_M | 34/64 | 7 / 1 / 56 | 52/64 |
+
+The temperature result narrows the Qwen3-4B conclusion: higher temperature partially restores contrast, but neither frozen setting reaches the original 30-prompt discovery threshold. Gemma preserves low yield in a non-Qwen deployment control. Qwen3.5 is different: 56/64 prompts are mixed and 52/64 emit both exact candidates, so its `34/64` eligible count is not explained only by malformed or off-candidate output.
+
+This means the trajectory-contrast paradigm is **model- and sampling-dependent**, not universally unavailable near 4B. The Qwen3.5 result remains descriptive because backend, Q4_K_M quantization, native renderer, and model generation differ from the Qwen3-4B FP16 run. It does not alter the completed v4c gate and, per protocol, did not trigger confirmatory residual experiments.
+
+See `results/PREREGISTERED_V4C_APPENDIX_DIAGNOSTICS.md` and `results/V4C_APPENDIX_DIAGNOSTICS.md`.
+
+## Final Qwen3.5-4B v4d Result
+
+The appendix unexpectedly identified a viable 4B trajectory population in the `qwen3.5:4b` Ollama deployment. v4d therefore froze a final two-stage test before touching the unquantized Hugging Face checkpoint. Stage 1 repeated the same 64 prompts with `Qwen/Qwen3.5-4B` revision `851bf6e...`, FP16 Transformers, and 16 fresh seeds per prompt.
+
+| deployment | eligible | mixed | exact candidate outputs | exact A/B-switch prompts |
+|---|---:|---:|---:|---:|
+| Ollama Q4_K_M | 34/64 | 56/64 | 962/1,024 | 52/64 |
+| Transformers FP16 | 36/64 | 55/64 | 952/1,024 | 53/64 |
+
+The frozen transfer gate passed. It selected 33 prompts from 22 template families and committed a grouped 17/8/8 train/validation/test split before confirmatory sampling. All 33 prompts remained mixed under 32 new seeds, so the accessibility comparison is identified rather than yield-inconclusive.
+
+| checkpoint | prompts | risks | residual L21 | TF-IDF | next-token | judge | residual delta |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2 | 8 | 3 | 0.500 | 0.500 | 0.500 | 0.500 | +0.000 |
+| 4 | 8 | 3 | 0.500 | 0.500 | 0.500 | 0.500 | +0.000 |
+| 6 | 5 | 2 | 0.500 | 0.500 | 0.500 | 0.500 | +0.000 |
+| 8 | 3 | 1 | 0.500 | 0.500 | 0.500 | 0.500 | +0.000 |
+| 10 | 3 | 1 | 0.500 | 0.500 | 0.500 | 0.500 | +0.000 |
+| 12 | 3 | 1 | 0.500 | 0.500 | 0.500 | 0.500 | +0.000 |
+
+The gate **FAILS** with no winning checkpoint. This exact chance curve is not a fitting failure: at checkpoints 0-16, every evaluable prompt has one visible prefix and zero within-prompt residual span at all captured layers. In the test set, all 1,014 early-spoiler/fake-commit cross-label pairs first diverge exactly at policy landing. The 714 hidden-fields pairs diverge two tokens earlier, but that narrow window falls between frozen checkpoints 16 and 24; only two prompts from one risk remain evaluable at checkpoint 24. No intermediate checkpoint was added post hoc.
+
+Six-layer capture costs `1.005x` plain generation (95% paired CI `0.953-1.062`, 16 pairs). The same-model judge costs `231.2` ms per unique prefix and remains at chance. v4d therefore finds abundant outcome stochasticity without an operationally usable signal at the frozen early checkpoints. Per the stopping boundary, no v4e or pre-submission scale curve is derived.
+
+See `results/PREREGISTERED_V4D_PROTOCOL.md`, `results/PREREGISTERED_V4D_CONFIRMATORY_PROTOCOL.md`, and `results/V4D_FINAL_REPORT.md`.
+
+Re-run the frozen confirmation after regenerating the discovery manifest:
+
+```powershell
+python .\src\run_trajectory_sampling.py `
+  --cases .\data\prompt_sets\trajectory_confirmatory_v4.jsonl `
+  --out-dir .\results\trajectory_v4_confirmatory `
+  --model-id Qwen/Qwen3-0.6B `
+  --conditions trajectory_ambiguous,trajectory_fair_choice,trajectory_calibrated_choice `
+  --samples-per-prompt 32 --seed-start 5000000 `
+  --temperature 0.8 --top-p 0.95 --max-new-tokens 48 `
+  --capture-checkpoints --checkpoints 0,2,4,6,8,10,12,16,24 `
+  --layers 0,6,12,18,24,27 --dtype float16
+
+python .\src\run_v4_prefix_judge.py
+python .\src\analyze_v4_trajectories.py `
+  --judge-scores .\results\trajectory_v4_confirmatory\Qwen__Qwen3-0.6B\prefix_judge_scores.jsonl
+python .\src\benchmark_v4_monitoring_cost.py
+```
+
+## Static Hugging Face Spaces Preview
+
+The free static Hugging Face Space is a result browser, not a GPU-heavy online fitter. It currently:
 
 - Show saved dense J-lens summaries
 - Compare attack/control cases
@@ -222,7 +384,7 @@ A free Hugging Face Spaces preview is planned. The first version should be a lig
 - Explain validator decisions
 - Show the paired-delta table and intervention sanity-check JSON
 
-The repository includes a minimal `app.py` for this future static preview path.
+The repository includes the deployed `space_static/` bundle and a minimal `app.py` compatibility entry point.
 
 ## Roadmap
 
@@ -237,9 +399,23 @@ The repository includes a minimal `app.py` for this future static preview path.
 - [x] Minimal pre-commit intervention sanity check
 - [x] Systematic suppress-vs-sham intervention sweep
 - [x] 32-prompt dense-lens stability ablation
-- [ ] Held-out-template leakage-controlled corpus
-- [ ] Cross-risk transfer probe evaluation
-- [ ] Hugging Face Spaces result browser
+- [x] Held-out-template leakage-controlled corpus
+- [x] Full-chat tokenizer leakage audit
+- [x] Prompt-text TF-IDF baselines
+- [x] Pair- and template-cluster confidence intervals
+- [x] Cross-risk transfer probe evaluation
+- [x] Risk-specific policy and structural validators
+- [x] Fixed-prompt divergent-trajectory discovery
+- [x] Semantic pre-landing token annotation
+- [x] Pre-registered within-prompt v4 evaluation
+- [x] Visible-prefix TF-IDF, next-token, and model-judge baselines
+- [x] Paired monitoring-cost benchmark
+- [x] Pre-registered Qwen3-4B frozen-prompt cross-scale replication
+- [x] Pre-registered Qwen3-4B-native v4c discovery and yield gate
+- [x] Frozen v4c temperature and Gemma/Qwen3.5 deployment diagnostics
+- [x] Pre-registered Qwen3.5-4B FP16 transfer and v4d confirmation
+- [x] Frozen v4d stopping boundary; experimental development complete
+- [x] Hugging Face Spaces result browser
 
 ## Acknowledgements
 

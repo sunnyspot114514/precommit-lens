@@ -5,6 +5,8 @@ pinned: false
 license: mit
 models:
 - Qwen/Qwen3-0.6B
+- Qwen/Qwen3-4B
+- Qwen/Qwen3.5-4B
 tags:
 - interpretability
 - jacobian-lens
@@ -17,9 +19,38 @@ short_description: Static PreCommitLens result browser.
 
 Static result browser for the PreCommitLens experiment.
 
-This Space does not download models, fit Jacobians, or run live inference. It only
+This Space does not download models, fit Jacobians, or run live inference. It
 serves precomputed dense Jacobian-lens summaries, paired attack/control deltas,
-and interpretation notes.
+and the pre-registered v4/v4b/v4c/v4d trajectory results.
+
+The v4 confirmatory run contains 1,088 fresh trajectories over 34 prompts. Its
+primary residual-added-value gate failed: internal residual prediction became
+accurate before policy landing, but a visible-prefix TF-IDF baseline matched it.
+
+The frozen-prompt Qwen3-4B replication is inconclusive for probe added value:
+only 2/34 prompts remain outcome-divergent, including 1/9 test prompts. This
+shows that the 0.6B contrast-selected benchmark does not directly transfer as a
+4B scale point.
+
+The separately pre-registered Qwen3-4B-native v4c discovery also stopped at its
+yield gate. Only 4/192 candidates reached the frozen within-prompt contrast
+interval across three mechanisms, so no confirmatory residual probe was fit.
+The complete 3,072-trajectory report is available in the viewer.
+
+The frozen post-hoc appendix finds temperature and model dependence. Qwen3-4B
+round-one eligibility rises from 3/64 at T=0.8 to 9/64 and 11/64 at T=1.2 and
+T=1.5, still below the original threshold. At T=0.8, `gemma4:e2b` yields 3/64
+eligible prompts while `qwen3.5:4b` yields 34/64. These Ollama Q4_K_M controls
+are descriptive and do not alter the completed v4c gate.
+
+The final pre-registered v4d run tests the Qwen3.5 opportunity directly. The
+same 64 prompts yield 36/64 eligible cases in unquantized Transformers FP16,
+triggering a 33-prompt confirmatory cohort with 1,056 fresh trajectories. All
+8 test prompts remain mixed, but residual, TF-IDF, next-token, and model-judge
+AUC are exactly 0.500 at every primary checkpoint. A post-hoc identity audit
+shows that all evaluable prompt states are identical through checkpoint 16;
+the accessibility gate therefore fails with no winning checkpoint. Per the
+frozen stopping rule, no v4e is derived.
 
 For the full code and reproduction scripts, see the GitHub repository:
 

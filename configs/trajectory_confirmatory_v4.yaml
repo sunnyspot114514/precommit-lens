@@ -1,0 +1,32 @@
+experiment: trajectory_confirmatory_v4
+model_id: Qwen/Qwen3-0.6B
+cases_jsonl: data/prompt_sets/trajectory_confirmatory_v4.jsonl
+dataset_sha256: 29763735accfb0e03d99fb81fff7da5cf5a303d626dc7803154185104d136907
+split_seed: 20260710
+sampling:
+  samples_per_prompt: 32
+  seed_start: 5000000
+  temperature: 0.8
+  top_p: 0.95
+  max_new_tokens: 48
+features:
+  checkpoints:
+  - 0
+  - 2
+  - 4
+  - 6
+  - 8
+  - 10
+  - 12
+  - 16
+  - 24
+  layers:
+  - 0
+  - 6
+  - 12
+  - 18
+  - 24
+  - 27
+  primary_layer: 18
+split_field: trajectory_split
+discovery_seeds_excluded: true

@@ -3,7 +3,43 @@
 This project attempted a local, small-model reproduction of selected results
 from Anthropic's "A global workspace in language models" work.
 
-## Method Actually Used
+## v3 Falsification Update
+
+The held-out-template v3 result supersedes the positive interpretation of the
+pilot examples below. On Qwen3-0.6B, overall semantic-risk AUC is `0.498` for
+dense J-lens and `0.481` for selected-layer JVP. A residual probe reaches
+`0.897`, but prompt-text TF-IDF reaches `1.000`; the paired residual-minus-text
+difference is `-0.103 [-0.138, -0.064]`.
+
+The original v2 audit also checked only user-prompt text. A full-chat re-audit
+found 100 target-absent `fake_commit` violations caused by `validator` in the
+shared system message. v3 corrects this with a complete-input `0/36,000` audit.
+
+Therefore the current evidence does not reproduce a privileged global
+workspace or establish that internal readouts contain governance information
+unavailable from the input surface. The sections below are retained as
+historical pilot provenance.
+
+## v4 Trajectory Update
+
+v4 holds each prompt fixed and compares compliant and violating sampled
+trajectories within that prompt. This removes the v3 failure mode in which the
+constructed semantic label was a deterministic function of prompt wording.
+The confirmatory run contains 1,088 fresh trajectories over 34 prompts; all
+9 test prompts remain mixed across three risk families.
+
+Trajectory outcome becomes readable before semantic policy landing. At
+checkpoint 8, the frozen layer-18 residual probe reaches prompt-macro AUC
+`0.823`. However, visible-prefix TF-IDF reaches `0.817`, and the paired
+residual advantage is only `+0.006 [0.000, 0.017]`. No checkpoint reaches the
+pre-registered `+0.03` added-value margin, so the primary v4 gate fails.
+
+The negative result is not caused by monitoring overhead: six-layer,
+nine-checkpoint capture costs `1.014x` plain generation in paired runs. v4
+therefore supports pre-landing trajectory prediction as a measurable task, but
+does not establish a privileged residual-state accessibility advantage.
+
+## Historical Pilot Method
 
 Implemented:
 
@@ -25,7 +61,7 @@ Not implemented:
 - reportability tests;
 - workspace census.
 
-## What Was Partially Reproduced
+## What the Pilot Appeared to Reproduce
 
 ### 1. Silent concepts can appear without final output
 
@@ -44,7 +80,7 @@ clean hidden-inference result.
 
 ### 2. Safety-relevant runtime concepts can appear before commit
 
-Stronger partial support.
+Historical partial support, not retained as a v3 conclusion.
 
 - `fake_commit` surfaced `commit` in all three models:
   - Phi-3: J rank 19;
@@ -79,21 +115,17 @@ Partial support.
 
 ## Current Bottom Line
 
-The local experiment reproduces a **weak engineering analogue** of Anthropic's
-J-lens result:
+The repository reproduces the dense/JVP engineering machinery on consumer
+hardware, but its leakage-controlled evidence does **not** reproduce the full
+Anthropic global-workspace claim. Dense/JVP are currently diagnostic baselines,
+not validated pre-commit governance monitors. The stronger v4 residual probe
+tracks future trajectory outcome, but a shallow visible-prefix model matches
+its primary performance.
 
-> Small open models expose silent or safety-relevant concepts through a
-> Jacobian-vector readout, and those concepts can be visible before or despite
-> final-output validation.
+## Scale Decision
 
-It does **not** reproduce the full Anthropic global-workspace claim.
-
-## Next Step
-
-The next serious step is causal:
-
-1. collect matched prompt pairs where target concepts are not directly present;
-2. fit a small linear residual-to-final lens over those traces;
-3. damp or replace high-risk concept directions before generation;
-4. measure whether final behavior changes.
-
+The matched-prompt, intervention, held-out-template, and fixed-prompt trajectory
+experiments have now run. The current dense-direction intervention increases
+rollback relative to paired sham controls, while v4 fails its residual
+added-value gate. Qwen3.5/Gemma confirmatory expansion and cloud-scale dense
+Jacobians therefore remain outside the present evidence gate.

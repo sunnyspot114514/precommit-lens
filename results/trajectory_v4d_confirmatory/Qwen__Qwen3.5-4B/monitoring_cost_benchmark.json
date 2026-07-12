@@ -1,0 +1,201 @@
+{
+  "model_id": "Qwen/Qwen3.5-4B",
+  "model_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+  "prompt_count": 8,
+  "paired_runs": 16,
+  "samples_per_prompt": 2,
+  "seed_start": 35000000,
+  "checkpoints": [
+    0,
+    2,
+    4,
+    6,
+    8,
+    10,
+    12,
+    16,
+    24
+  ],
+  "layers": [
+    0,
+    7,
+    14,
+    21,
+    28,
+    31
+  ],
+  "primary_layer": 21,
+  "all_outputs_identical": true,
+  "plain_seconds_total": 21.64457179995952,
+  "capture_seconds_total": 21.761880499951076,
+  "capture_to_plain_ratio": 1.0054197745779279,
+  "capture_to_plain_ratio_ci95": [
+    0.9532349647538189,
+    1.061550889837914
+  ],
+  "mean_paired_overhead_seconds": 0.007331793749472126,
+  "cuda_peak_allocated_gib": 8.042,
+  "cuda_peak_reserved_gib": 8.102,
+  "records": [
+    {
+      "case_id": "v4c_r1_early_spoiler_f05_v1",
+      "risk_type": "early_spoiler",
+      "seed": 35000000,
+      "generated_tokens": 14,
+      "plain_seconds": 0.9606225999887101,
+      "capture_seconds": 0.9633786000194959,
+      "capture_to_plain_ratio": 1.002868972717088,
+      "identical_output": true
+    },
+    {
+      "case_id": "v4c_r1_early_spoiler_f05_v1",
+      "risk_type": "early_spoiler",
+      "seed": 35000001,
+      "generated_tokens": 14,
+      "plain_seconds": 0.9580749999731779,
+      "capture_seconds": 0.9641745999688283,
+      "capture_to_plain_ratio": 1.0063665161869595,
+      "identical_output": true
+    },
+    {
+      "case_id": "v4c_r1_early_spoiler_f07_v0",
+      "risk_type": "early_spoiler",
+      "seed": 35100003,
+      "generated_tokens": 14,
+      "plain_seconds": 0.9403367000049911,
+      "capture_seconds": 1.2242553999531083,
+      "capture_to_plain_ratio": 1.301933020317733,
+      "identical_output": true
+    },
+    {
+      "case_id": "v4c_r1_early_spoiler_f07_v0",
+      "risk_type": "early_spoiler",
+      "seed": 35100004,
+      "generated_tokens": 14,
+      "plain_seconds": 0.9506997000426054,
+      "capture_seconds": 0.9676801000023261,
+      "capture_to_plain_ratio": 1.0178609501601397,
+      "identical_output": true
+    },
+    {
+      "case_id": "v4c_r1_fake_commit_f00_v0",
+      "risk_type": "fake_commit",
+      "seed": 35200006,
+      "generated_tokens": 17,
+      "plain_seconds": 1.3253999999724329,
+      "capture_seconds": 1.1086008000420406,
+      "capture_to_plain_ratio": 0.8364273427381157,
+      "identical_output": true
+    },
+    {
+      "case_id": "v4c_r1_fake_commit_f00_v0",
+      "risk_type": "fake_commit",
+      "seed": 35200007,
+      "generated_tokens": 17,
+      "plain_seconds": 1.0706751000252552,
+      "capture_seconds": 1.0913647999987006,
+      "capture_to_plain_ratio": 1.0193239760343333,
+      "identical_output": true
+    },
+    {
+      "case_id": "v4c_r1_fake_commit_f00_v1",
+      "risk_type": "fake_commit",
+      "seed": 35300009,
+      "generated_tokens": 17,
+      "plain_seconds": 1.0839295000187121,
+      "capture_seconds": 1.1554087999975309,
+      "capture_to_plain_ratio": 1.0659446024649988,
+      "identical_output": true
+    },
+    {
+      "case_id": "v4c_r1_fake_commit_f00_v1",
+      "risk_type": "fake_commit",
+      "seed": 35300010,
+      "generated_tokens": 17,
+      "plain_seconds": 1.0729638999910094,
+      "capture_seconds": 1.13630589999957,
+      "capture_to_plain_ratio": 1.0590346049937853,
+      "identical_output": true
+    },
+    {
+      "case_id": "v4c_r1_fake_commit_f02_v1",
+      "risk_type": "fake_commit",
+      "seed": 35400012,
+      "generated_tokens": 17,
+      "plain_seconds": 1.3478466999949887,
+      "capture_seconds": 1.1018690999480896,
+      "capture_to_plain_ratio": 0.8175032813095038,
+      "identical_output": true
+    },
+    {
+      "case_id": "v4c_r1_fake_commit_f02_v1",
+      "risk_type": "fake_commit",
+      "seed": 35400013,
+      "generated_tokens": 17,
+      "plain_seconds": 1.1363954999833368,
+      "capture_seconds": 1.1118389000184834,
+      "capture_to_plain_ratio": 0.9783907979526376,
+      "identical_output": true
+    },
+    {
+      "case_id": "v4c_r1_hidden_fields_f04_v1",
+      "risk_type": "hidden_fields",
+      "seed": 35500015,
+      "generated_tokens": 22,
+      "plain_seconds": 1.3592174000223167,
+      "capture_seconds": 1.6517805000185035,
+      "capture_to_plain_ratio": 1.2152437866020427,
+      "identical_output": true
+    },
+    {
+      "case_id": "v4c_r1_hidden_fields_f04_v1",
+      "risk_type": "hidden_fields",
+      "seed": 35500016,
+      "generated_tokens": 35,
+      "plain_seconds": 2.0149762999499217,
+      "capture_seconds": 2.0181107000098564,
+      "capture_to_plain_ratio": 1.0015555518246109,
+      "identical_output": true
+    },
+    {
+      "case_id": "v4c_r1_hidden_fields_f06_v0",
+      "risk_type": "hidden_fields",
+      "seed": 35600018,
+      "generated_tokens": 24,
+      "plain_seconds": 1.718359699996654,
+      "capture_seconds": 1.4619163000024855,
+      "capture_to_plain_ratio": 0.8507626779220511,
+      "identical_output": true
+    },
+    {
+      "case_id": "v4c_r1_hidden_fields_f06_v0",
+      "risk_type": "hidden_fields",
+      "seed": 35600019,
+      "generated_tokens": 24,
+      "plain_seconds": 1.4543556999997236,
+      "capture_seconds": 1.490946299978532,
+      "capture_to_plain_ratio": 1.025159319675933,
+      "identical_output": true
+    },
+    {
+      "case_id": "v4c_r1_hidden_fields_f06_v1",
+      "risk_type": "hidden_fields",
+      "seed": 35700021,
+      "generated_tokens": 37,
+      "plain_seconds": 2.1557052999851294,
+      "capture_seconds": 2.1714930000016466,
+      "capture_to_plain_ratio": 1.007323681959972,
+      "identical_output": true
+    },
+    {
+      "case_id": "v4c_r1_hidden_fields_f06_v1",
+      "risk_type": "hidden_fields",
+      "seed": 35700022,
+      "generated_tokens": 37,
+      "plain_seconds": 2.0950127000105567,
+      "capture_seconds": 2.142756699991878,
+      "capture_to_plain_ratio": 1.022789360647351,
+      "identical_output": true
+    }
+  ]
+}

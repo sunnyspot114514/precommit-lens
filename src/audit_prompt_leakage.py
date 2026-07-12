@@ -1,9 +1,9 @@
-"""Tokenizer-level leakage audit for prompt sets.
+"""Tokenizer-level leakage audit for complete rendered model inputs.
 
 String checks catch obvious target words, but a watched concept can still leak
-through tokenizer-specific variants such as " reveal" vs "reveal" or a
-multi-token split.  This script audits target-absent prompts by tokenizing the
-prompt and asserting that no watched concept token sequence appears directly.
+through the system message, chat template, or tokenizer-specific variants. The
+default audit therefore checks the same system+user chat input that the model
+receives. Prompt-only mode exists only to reproduce the narrower v2 audit.
 """
 
 from __future__ import annotations
@@ -28,6 +28,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--out-json", type=Path, required=True)
     parser.add_argument("--out-md", type=Path, default=None)
     parser.add_argument("--allow-leaks", action="store_true")
+    parser.add_argument("--input-scope", choices=["full_chat", "prompt_only"], default="full_chat")
     return parser.parse_args()
 
 
@@ -71,10 +72,40 @@ def find_subsequence(haystack: list[int], needle: list[int]) -> int | None:
     return None
 
 
+def _flat_token_ids(value: Any) -> list[int]:
+    if isinstance(value, dict) or hasattr(value, "get"):
+        value = value["input_ids"]
+    if hasattr(value, "tolist"):
+        value = value.tolist()
+    if value and isinstance(value[0], list):
+        value = value[0]
+    return [int(token_id) for token_id in value]
+
+
+def rendered_case_ids(row: dict[str, Any], tokenizer: Any, input_scope: str) -> list[int]:
+    if input_scope == "prompt_only":
+        return [int(token_id) for token_id in tokenizer.encode(row["prompt"], add_special_tokens=False)]
+
+    messages = []
+    if row.get("system"):
+        messages.append({"role": "system", "content": str(row["system"])})
+    messages.append({"role": "user", "content": str(row["prompt"])})
+    if getattr(tokenizer, "chat_template", None):
+        kwargs = {"tokenize": True, "add_generation_prompt": True}
+        try:
+            encoded = tokenizer.apply_chat_template(messages, enable_thinking=False, **kwargs)
+        except TypeError:
+            encoded = tokenizer.apply_chat_template(messages, **kwargs)
+        return _flat_token_ids(encoded)
+    text = "\n\n".join(str(message["content"]) for message in messages)
+    return [int(token_id) for token_id in tokenizer.encode(text, add_special_tokens=False)]
+
+
 def audit_rows(
     rows: list[dict[str, Any]],
     config: dict[str, Any],
     tokenizer: Any,
+    input_scope: str = "full_chat",
 ) -> dict[str, Any]:
     violations = []
     token_sequences_checked = 0
@@ -87,7 +118,7 @@ def audit_rows(
         target_absent_cases += 1
         risk = row.get("risk_type", "unknown")
         by_risk[risk]["target_absent_cases"] += 1
-        prompt_ids = tokenizer.encode(row["prompt"], add_special_tokens=False)
+        input_ids = rendered_case_ids(row, tokenizer, input_scope)
         seen_sequences: set[tuple[int, ...]] = set()
         for concept, text in case_variants(row, config):
             ids = tokenizer.encode(text, add_special_tokens=False)
@@ -98,7 +129,7 @@ def audit_rows(
                 continue
             seen_sequences.add(key)
             token_sequences_checked += 1
-            at = find_subsequence(prompt_ids, list(key))
+            at = find_subsequence(input_ids, list(key))
             if at is None:
                 continue
             by_risk[risk]["violations"] += 1
@@ -112,11 +143,13 @@ def audit_rows(
                     "token_ids": list(key),
                     "token_index": at,
                     "decoded": tokenizer.decode(list(key)),
+                    "system": row.get("system", ""),
                     "prompt": row["prompt"],
                 }
             )
 
     return {
+        "input_scope": input_scope,
         "target_absent_cases": target_absent_cases,
         "token_sequences_checked": token_sequences_checked,
         "violation_count": len(violations),
@@ -127,9 +160,10 @@ def audit_rows(
 
 def write_markdown(path: Path, payload: dict[str, Any], model_id: str) -> None:
     lines = [
-        "# Token-Level Prompt Leakage Audit",
+        "# Token-Level Model-Input Leakage Audit",
         "",
         f"- model tokenizer: `{model_id}`",
+        f"- input scope: `{payload.get('input_scope', 'prompt_only')}`",
         f"- target-absent cases: `{payload['target_absent_cases']}`",
         f"- token sequences checked: `{payload['token_sequences_checked']}`",
         f"- violations: `{payload['violation_count']}`",
@@ -162,7 +196,7 @@ def main() -> int:
         local_files_only=not args.allow_download,
         trust_remote_code=True,
     )
-    payload = audit_rows(rows, config, tokenizer)
+    payload = audit_rows(rows, config, tokenizer, input_scope=args.input_scope)
     payload["model_id"] = args.model_id
     args.out_json.parent.mkdir(parents=True, exist_ok=True)
     args.out_json.write_text(json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8")
