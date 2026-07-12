@@ -23,6 +23,7 @@ This project is not a full reproduction of Anthropic's Global Workspace result. 
 - The pre-registered v4 trajectory run is complete: 1,088 fresh trajectories over 34 fixed prompts. All 9 test prompts remained outcome-divergent, but the residual added-value gate failed. At checkpoint 8, layer-18 residual AUC is `0.823` versus visible-prefix TF-IDF `0.817`; the paired advantage is only `+0.006 [0.000, 0.017]`, below the frozen `+0.03` margin. See `results/trajectory_v4_confirmatory/Qwen__Qwen3-0.6B/V4_CONFIRMATORY_RESULTS.md`.
 - The pre-registered Qwen3-4B v4b replication is complete on the same frozen prompts. Contrast does not transfer: only `2/34` prompts remain mixed, including `1/9` test prompts from one risk, so the accessibility gate is **inconclusive** before probe comparison. See `results/V4_V4B_CROSS_SCALE_REPORT.md`.
 - The pre-registered 4B-native v4c discovery is also complete. Three frozen mechanisms yielded only `3/64`, `1/64`, and `0/64` eligible prompts, so the final gate is **DISCOVERY YIELD FAIL** and no confirmatory residual probe was fit. See `results/V4C_DISCOVERY_FINAL_REPORT.md`.
+- The frozen post-hoc appendix is complete. On Qwen3-4B, eligible round-one prompts rise from `3/64` at T=0.8 to `9/64` at T=1.2 and `11/64` at T=1.5, still below the original 30-prompt gate. At T=0.8, Ollama Q4_K_M controls yield `3/64` for `gemma4:e2b` and `34/64` for `qwen3.5:4b`. See `results/V4C_APPENDIX_DIAGNOSTICS.md`.
 
 ## Motivation
 
@@ -47,6 +48,7 @@ configs/
   trajectory_confirmatory_v4.yaml
   trajectory_confirmatory_v4b.yaml
   trajectory_discovery_v4c_manifest.yaml
+  v4c_appendix_diagnostics.yaml
 
 data/prompt_sets/
   heldout_templates_v3.jsonl         # 960-case held-out-template corpus
@@ -66,6 +68,8 @@ src/
   summarize_v4_cross_scale.py        # Frozen-prompt scale-transfer report
   evaluate_v4c_discovery.py          # Frozen sequential discovery gate
   summarize_v4c_discovery.py         # Final v4c integrity and yield report
+  run_ollama_trajectory_sampling.py  # Digest-locked deployment-state sampler
+  summarize_v4c_appendix_diagnostics.py
 
 results/
   HELDOUT_TEMPLATE_V3_REPORT.md
@@ -73,8 +77,10 @@ results/
   PREREGISTERED_V4_CONFIRMATORY_PROTOCOL.md
   PREREGISTERED_V4B_CROSS_SCALE_PROTOCOL.md
   PREREGISTERED_V4C_DISCOVERY_PROTOCOL.md
+  PREREGISTERED_V4C_APPENDIX_DIAGNOSTICS.md
   V4_V4B_CROSS_SCALE_REPORT.md
   V4C_DISCOVERY_FINAL_REPORT.md
+  V4C_APPENDIX_DIAGNOSTICS.md
   TRAJECTORY_V4_DISCOVERY_REPORT.md
   QWEN3_DENSE_JLENS_INTERPRETATION.md
   dense_jlens_qwen_fulllayers_4fit/
@@ -294,6 +300,24 @@ A disclosed post-discovery diagnostic helps explain round three: for non-tie lot
 
 The full 3,072-trajectory FP16 discovery used at most `7.592 GiB` allocated VRAM on the RTX 3060. See `results/PREREGISTERED_V4C_DISCOVERY_PROTOCOL.md` and `results/V4C_DISCOVERY_FINAL_REPORT.md`.
 
+## v4c Post-Hoc Appendix Diagnostics
+
+The appendix protocol was committed before any appendix trajectory was sampled. It reuses the exact 64 round-one prompts and does not create a new gate, select a replacement pool, or authorize residual fitting.
+
+| model / setting | backend | eligible | always commit / rollback / mixed | exact A/B-switch prompts |
+|---|---|---:|---:|---:|
+| Qwen3-4B, T=0.8 | Transformers FP16 | 3/64 | 25 / 24 / 15 | 15/64 |
+| Qwen3-4B, T=1.2 | Transformers FP16 | 9/64 | 18 / 22 / 24 | 23/64 |
+| Qwen3-4B, T=1.5 | Transformers FP16 | 11/64 | 17 / 21 / 26 | 26/64 |
+| `gemma4:e2b`, T=0.8 | Ollama Q4_K_M | 3/64 | 29 / 25 / 10 | 6/64 |
+| `qwen3.5:4b`, T=0.8 | Ollama Q4_K_M | 34/64 | 7 / 1 / 56 | 52/64 |
+
+The temperature result narrows the Qwen3-4B conclusion: higher temperature partially restores contrast, but neither frozen setting reaches the original 30-prompt discovery threshold. Gemma preserves low yield in a non-Qwen deployment control. Qwen3.5 is different: 56/64 prompts are mixed and 52/64 emit both exact candidates, so its `34/64` eligible count is not explained only by malformed or off-candidate output.
+
+This means the trajectory-contrast paradigm is **model- and sampling-dependent**, not universally unavailable near 4B. The Qwen3.5 result remains descriptive because backend, Q4_K_M quantization, native renderer, and model generation differ from the Qwen3-4B FP16 run. It does not alter the completed v4c gate and, per protocol, did not trigger confirmatory residual experiments.
+
+See `results/PREREGISTERED_V4C_APPENDIX_DIAGNOSTICS.md` and `results/V4C_APPENDIX_DIAGNOSTICS.md`.
+
 Re-run the frozen confirmation after regenerating the discovery manifest:
 
 ```powershell
@@ -351,6 +375,7 @@ The repository includes the deployed `space_static/` bundle and a minimal `app.p
 - [x] Paired monitoring-cost benchmark
 - [x] Pre-registered Qwen3-4B frozen-prompt cross-scale replication
 - [x] Pre-registered Qwen3-4B-native v4c discovery and yield gate
+- [x] Frozen v4c temperature and Gemma/Qwen3.5 deployment diagnostics
 - [x] Hugging Face Spaces result browser
 
 ## Acknowledgements

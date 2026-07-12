@@ -1,0 +1,473 @@
+{
+  "analysis_status": "posthoc_appendix_no_new_gate",
+  "main_v4c_gate_unchanged": true,
+  "confirmatory_probe_run": false,
+  "source_cases_sha256": "74f8d38d023c41fbeb3b790f39bbbf46f2e99d6814431bd576d7c13bbfcc114e",
+  "conditions": [
+    {
+      "condition_id": "qwen3_4b_t0p8",
+      "group": "temperature",
+      "model_id": "Qwen/Qwen3-4B",
+      "model_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "backend": "transformers",
+      "precision": "float16",
+      "model_family": null,
+      "model_parameter_size": null,
+      "temperature": 0.8,
+      "top_p": 0.95,
+      "seed_start": 11000000,
+      "prompt_count": 64,
+      "trajectory_count": 1024,
+      "eligible_prompt_count": 3,
+      "states": {
+        "always_commit": 25,
+        "always_rollback": 24,
+        "mixed": 15
+      },
+      "candidate_choice": {
+        "candidate_a_count": 738,
+        "candidate_b_count": 279,
+        "other_count": 7,
+        "exact_candidate_count": 1017,
+        "exact_candidate_rate": 0.9931640625,
+        "both_exact_candidates_prompt_count": 15,
+        "one_exact_candidate_prompt_count": 49,
+        "no_exact_candidate_prompt_count": 0,
+        "prompts_with_other_output_count": 3
+      },
+      "by_risk": {
+        "early_spoiler": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 61,
+          "violation_rate": 0.23828125,
+          "eligible_prompt_count": 1,
+          "states": {
+            "always_commit": 11,
+            "always_rollback": 3,
+            "mixed": 2
+          }
+        },
+        "fake_commit": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 103,
+          "violation_rate": 0.40234375,
+          "eligible_prompt_count": 1,
+          "states": {
+            "always_commit": 8,
+            "always_rollback": 4,
+            "mixed": 4
+          }
+        },
+        "hidden_fields": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 224,
+          "violation_rate": 0.875,
+          "eligible_prompt_count": 0,
+          "states": {
+            "always_commit": 2,
+            "always_rollback": 14,
+            "mixed": 0
+          }
+        },
+        "schema_bypass": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 149,
+          "violation_rate": 0.58203125,
+          "eligible_prompt_count": 1,
+          "states": {
+            "always_commit": 4,
+            "always_rollback": 3,
+            "mixed": 9
+          }
+        }
+      },
+      "cost": {
+        "generated_tokens": 26701,
+        "generation_seconds": 1254.4247606010176,
+        "tokens_per_second": 21.28545357093164,
+        "cuda_peak_allocated_gib": 7.589
+      },
+      "source_sha256": {
+        "cases_jsonl": "74f8d38d023c41fbeb3b790f39bbbf46f2e99d6814431bd576d7c13bbfcc114e",
+        "sampling_summary_json": "cf3b7bd13cc378714cb6a38de903fbb8a1d0dbeeac262e12c3c716e74d721b3a",
+        "trajectories_jsonl": "1c381158417af9c1b6214be9e94dee8b3f41b9008e882bfc27470e0969ddd693"
+      }
+    },
+    {
+      "condition_id": "qwen3_4b_t1p2",
+      "group": "temperature",
+      "model_id": "Qwen/Qwen3-4B",
+      "model_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "backend": "transformers",
+      "precision": "float16",
+      "model_family": null,
+      "model_parameter_size": null,
+      "temperature": 1.2,
+      "top_p": 0.95,
+      "seed_start": 21000000,
+      "prompt_count": 64,
+      "trajectory_count": 1024,
+      "eligible_prompt_count": 9,
+      "states": {
+        "always_commit": 18,
+        "always_rollback": 22,
+        "mixed": 24
+      },
+      "candidate_choice": {
+        "candidate_a_count": 710,
+        "candidate_b_count": 305,
+        "other_count": 9,
+        "exact_candidate_count": 1015,
+        "exact_candidate_rate": 0.9912109375,
+        "both_exact_candidates_prompt_count": 23,
+        "one_exact_candidate_prompt_count": 41,
+        "no_exact_candidate_prompt_count": 0,
+        "prompts_with_other_output_count": 4
+      },
+      "by_risk": {
+        "early_spoiler": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 58,
+          "violation_rate": 0.2265625,
+          "eligible_prompt_count": 1,
+          "states": {
+            "always_commit": 11,
+            "always_rollback": 2,
+            "mixed": 3
+          }
+        },
+        "fake_commit": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 109,
+          "violation_rate": 0.42578125,
+          "eligible_prompt_count": 3,
+          "states": {
+            "always_commit": 4,
+            "always_rollback": 3,
+            "mixed": 9
+          }
+        },
+        "hidden_fields": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 225,
+          "violation_rate": 0.87890625,
+          "eligible_prompt_count": 0,
+          "states": {
+            "always_commit": 1,
+            "always_rollback": 14,
+            "mixed": 1
+          }
+        },
+        "schema_bypass": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 140,
+          "violation_rate": 0.546875,
+          "eligible_prompt_count": 5,
+          "states": {
+            "always_commit": 2,
+            "always_rollback": 3,
+            "mixed": 11
+          }
+        }
+      },
+      "cost": {
+        "generated_tokens": 26658,
+        "generation_seconds": 1251.6145155013655,
+        "tokens_per_second": 21.298890089430987,
+        "cuda_peak_allocated_gib": 7.589
+      },
+      "source_sha256": {
+        "cases_jsonl": "74f8d38d023c41fbeb3b790f39bbbf46f2e99d6814431bd576d7c13bbfcc114e",
+        "sampling_summary_json": "3da53608757e7f6622ecd1bdcb875c1c66e8670b55e38e29caeb17fbfed75e44",
+        "trajectories_jsonl": "fd268f10544a986ed39d2f3021d75581c1540cd56019bfde99e08377533111e6"
+      }
+    },
+    {
+      "condition_id": "qwen3_4b_t1p5",
+      "group": "temperature",
+      "model_id": "Qwen/Qwen3-4B",
+      "model_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "backend": "transformers",
+      "precision": "float16",
+      "model_family": null,
+      "model_parameter_size": null,
+      "temperature": 1.5,
+      "top_p": 0.95,
+      "seed_start": 22000000,
+      "prompt_count": 64,
+      "trajectory_count": 1024,
+      "eligible_prompt_count": 11,
+      "states": {
+        "always_commit": 17,
+        "always_rollback": 21,
+        "mixed": 26
+      },
+      "candidate_choice": {
+        "candidate_a_count": 710,
+        "candidate_b_count": 298,
+        "other_count": 16,
+        "exact_candidate_count": 1008,
+        "exact_candidate_rate": 0.984375,
+        "both_exact_candidates_prompt_count": 26,
+        "one_exact_candidate_prompt_count": 38,
+        "no_exact_candidate_prompt_count": 0,
+        "prompts_with_other_output_count": 5
+      },
+      "by_risk": {
+        "early_spoiler": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 51,
+          "violation_rate": 0.19921875,
+          "eligible_prompt_count": 2,
+          "states": {
+            "always_commit": 11,
+            "always_rollback": 2,
+            "mixed": 3
+          }
+        },
+        "fake_commit": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 114,
+          "violation_rate": 0.4453125,
+          "eligible_prompt_count": 5,
+          "states": {
+            "always_commit": 3,
+            "always_rollback": 4,
+            "mixed": 9
+          }
+        },
+        "hidden_fields": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 226,
+          "violation_rate": 0.8828125,
+          "eligible_prompt_count": 0,
+          "states": {
+            "always_commit": 1,
+            "always_rollback": 13,
+            "mixed": 2
+          }
+        },
+        "schema_bypass": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 140,
+          "violation_rate": 0.546875,
+          "eligible_prompt_count": 4,
+          "states": {
+            "always_commit": 2,
+            "always_rollback": 2,
+            "mixed": 12
+          }
+        }
+      },
+      "cost": {
+        "generated_tokens": 26756,
+        "generation_seconds": 1227.3596227999078,
+        "tokens_per_second": 21.79964168852403,
+        "cuda_peak_allocated_gib": 7.589
+      },
+      "source_sha256": {
+        "cases_jsonl": "74f8d38d023c41fbeb3b790f39bbbf46f2e99d6814431bd576d7c13bbfcc114e",
+        "sampling_summary_json": "bcd4574ab0e3245c60dd3b1f4d08c73d7cf3c089f0bb77c20229c16a7ee1ac5d",
+        "trajectories_jsonl": "347ed569c92b6cd694f73f41910689c8f7ecc126c89854c6751cbf27c4627dbf"
+      }
+    },
+    {
+      "condition_id": "gemma4_e2b_t0p8",
+      "group": "deployment_model",
+      "model_id": "gemma4:e2b",
+      "model_revision": "7fbdbf8f5e45a75bb122155ed546e765b4d9c53a1285f62fd9f506baa1c5a47e",
+      "backend": "ollama_api_chat",
+      "precision": "Q4_K_M",
+      "model_family": "gemma4",
+      "model_parameter_size": "5.1B",
+      "temperature": 0.8,
+      "top_p": 0.95,
+      "seed_start": 31000000,
+      "prompt_count": 64,
+      "trajectory_count": 1024,
+      "eligible_prompt_count": 3,
+      "states": {
+        "always_commit": 29,
+        "always_rollback": 25,
+        "mixed": 10
+      },
+      "candidate_choice": {
+        "candidate_a_count": 363,
+        "candidate_b_count": 610,
+        "other_count": 51,
+        "exact_candidate_count": 973,
+        "exact_candidate_rate": 0.9501953125,
+        "both_exact_candidates_prompt_count": 6,
+        "one_exact_candidate_prompt_count": 58,
+        "no_exact_candidate_prompt_count": 0,
+        "prompts_with_other_output_count": 9
+      },
+      "by_risk": {
+        "early_spoiler": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 36,
+          "violation_rate": 0.140625,
+          "eligible_prompt_count": 1,
+          "states": {
+            "always_commit": 12,
+            "always_rollback": 0,
+            "mixed": 4
+          }
+        },
+        "fake_commit": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 206,
+          "violation_rate": 0.8046875,
+          "eligible_prompt_count": 2,
+          "states": {
+            "always_commit": 2,
+            "always_rollback": 11,
+            "mixed": 3
+          }
+        },
+        "hidden_fields": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 241,
+          "violation_rate": 0.94140625,
+          "eligible_prompt_count": 0,
+          "states": {
+            "always_commit": 0,
+            "always_rollback": 14,
+            "mixed": 2
+          }
+        },
+        "schema_bypass": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 1,
+          "violation_rate": 0.00390625,
+          "eligible_prompt_count": 0,
+          "states": {
+            "always_commit": 15,
+            "always_rollback": 0,
+            "mixed": 1
+          }
+        }
+      },
+      "cost": {
+        "generated_tokens": 25331,
+        "generation_seconds": 626.0216557999374,
+        "tokens_per_second": 40.46345644006798,
+        "cuda_peak_allocated_gib": null
+      },
+      "source_sha256": {
+        "cases_jsonl": "74f8d38d023c41fbeb3b790f39bbbf46f2e99d6814431bd576d7c13bbfcc114e",
+        "sampling_summary_json": "4aa822a91e7d59b7820f7d961507a38d0b00ae6272004b3a437aeb0e445d16cb",
+        "trajectories_jsonl": "a61c859c5d8c89ce75ca6b01f961abb6a72f58c4151ac6d541b31897bad503c1"
+      }
+    },
+    {
+      "condition_id": "qwen35_4b_t0p8",
+      "group": "deployment_model",
+      "model_id": "qwen3.5:4b",
+      "model_revision": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+      "backend": "ollama_api_chat",
+      "precision": "Q4_K_M",
+      "model_family": "qwen35",
+      "model_parameter_size": "4.7B",
+      "temperature": 0.8,
+      "top_p": 0.95,
+      "seed_start": 32000000,
+      "prompt_count": 64,
+      "trajectory_count": 1024,
+      "eligible_prompt_count": 34,
+      "states": {
+        "always_commit": 7,
+        "always_rollback": 1,
+        "mixed": 56
+      },
+      "candidate_choice": {
+        "candidate_a_count": 537,
+        "candidate_b_count": 425,
+        "other_count": 62,
+        "exact_candidate_count": 962,
+        "exact_candidate_rate": 0.939453125,
+        "both_exact_candidates_prompt_count": 52,
+        "one_exact_candidate_prompt_count": 12,
+        "no_exact_candidate_prompt_count": 0,
+        "prompts_with_other_output_count": 16
+      },
+      "by_risk": {
+        "early_spoiler": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 153,
+          "violation_rate": 0.59765625,
+          "eligible_prompt_count": 12,
+          "states": {
+            "always_commit": 0,
+            "always_rollback": 0,
+            "mixed": 16
+          }
+        },
+        "fake_commit": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 118,
+          "violation_rate": 0.4609375,
+          "eligible_prompt_count": 8,
+          "states": {
+            "always_commit": 1,
+            "always_rollback": 0,
+            "mixed": 15
+          }
+        },
+        "hidden_fields": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 164,
+          "violation_rate": 0.640625,
+          "eligible_prompt_count": 10,
+          "states": {
+            "always_commit": 1,
+            "always_rollback": 1,
+            "mixed": 14
+          }
+        },
+        "schema_bypass": {
+          "prompt_count": 16,
+          "trajectory_count": 256,
+          "violation_count": 46,
+          "violation_rate": 0.1796875,
+          "eligible_prompt_count": 4,
+          "states": {
+            "always_commit": 5,
+            "always_rollback": 0,
+            "mixed": 11
+          }
+        }
+      },
+      "cost": {
+        "generated_tokens": 23946,
+        "generation_seconds": 624.1863227008143,
+        "tokens_per_second": 38.36354487292702,
+        "cuda_peak_allocated_gib": null
+      },
+      "source_sha256": {
+        "cases_jsonl": "74f8d38d023c41fbeb3b790f39bbbf46f2e99d6814431bd576d7c13bbfcc114e",
+        "sampling_summary_json": "584d2bad60c179d448dee3b77bc7ddba3f7de67b195a1aa24946c2ac6ccad73b",
+        "trajectories_jsonl": "f29705ef9745b7d960de659da3fe6c8492d51d3c714d1eb50705d2de6afa534e"
+      }
+    }
+  ]
+}

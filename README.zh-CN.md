@@ -21,6 +21,7 @@ PreCommitLens 是一个轻量化 Jacobian-lens 复现实验，也是一个面向
 - 预注册的 v4 轨迹实验已经完成：34 个固定 prompt、1,088 条全新轨迹。9/9 个 test prompt 都保持轨迹分歧，但 residual 新增价值门槛失败。checkpoint 8 的 layer-18 residual AUC 为 `0.823`，可见前缀 TF-IDF 为 `0.817`；配对优势只有 `+0.006 [0.000, 0.017]`，低于冻结的 `+0.03` 门槛。详见 `results/trajectory_v4_confirmatory/Qwen__Qwen3-0.6B/V4_CONFIRMATORY_RESULTS.md`。
 - 预注册的 Qwen3-4B v4b 跨规模复现已经完成，并严格复用同一批冻结 prompt。轨迹分歧没有迁移：只有 `2/34` 个 prompt 仍为 mixed，test 中仅 `1/9` 且只覆盖一个风险，因此 accessibility gate 在 probe 比较前即为 **inconclusive**。详见 `results/V4_V4B_CROSS_SCALE_REPORT.md`。
 - 预注册的 4B 原生 v4c discovery 也已完成。三种冻结机制分别只得到 `3/64`、`1/64` 和 `0/64` 个 eligible prompt，因此最终门槛为 **DISCOVERY YIELD FAIL**，没有拟合确认性 residual probe。详见 `results/V4C_DISCOVERY_FINAL_REPORT.md`。
+- 冻结的 post-hoc appendix 已完成。Qwen3-4B round-one eligible prompt 从 T=0.8 的 `3/64` 升至 T=1.2 的 `9/64` 和 T=1.5 的 `11/64`，仍低于原始 30-prompt gate。T=0.8 的 Ollama Q4_K_M 对照中，`gemma4:e2b` 为 `3/64`，`qwen3.5:4b` 为 `34/64`。详见 `results/V4C_APPENDIX_DIAGNOSTICS.md`。
 
 ## 背景与动机
 
@@ -45,6 +46,7 @@ configs/
   trajectory_confirmatory_v4.yaml
   trajectory_confirmatory_v4b.yaml
   trajectory_discovery_v4c_manifest.yaml
+  v4c_appendix_diagnostics.yaml
 
 data/prompt_sets/
   heldout_templates_v3.jsonl         # 960-case held-out-template 语料
@@ -64,6 +66,8 @@ src/
   summarize_v4_cross_scale.py        # 冻结 prompt 的跨规模迁移报告
   evaluate_v4c_discovery.py          # 冻结的顺序 discovery gate
   summarize_v4c_discovery.py         # v4c 完整性与 yield 最终报告
+  run_ollama_trajectory_sampling.py  # digest 锁定的部署态采样器
+  summarize_v4c_appendix_diagnostics.py
 
 results/
   HELDOUT_TEMPLATE_V3_REPORT.md
@@ -71,8 +75,10 @@ results/
   PREREGISTERED_V4_CONFIRMATORY_PROTOCOL.md
   PREREGISTERED_V4B_CROSS_SCALE_PROTOCOL.md
   PREREGISTERED_V4C_DISCOVERY_PROTOCOL.md
+  PREREGISTERED_V4C_APPENDIX_DIAGNOSTICS.md
   V4_V4B_CROSS_SCALE_REPORT.md
   V4C_DISCOVERY_FINAL_REPORT.md
+  V4C_APPENDIX_DIAGNOSTICS.md
   TRAJECTORY_V4_DISCOVERY_REPORT.md
   QWEN3_DENSE_JLENS_INTERPRETATION.md
   dense_jlens_qwen_fulllayers_4fit/
@@ -292,6 +298,24 @@ v4c 检验 v4b 无法识别的一个独立问题：为 Qwen3-4B 重新构造 dis
 
 完整 3,072 条轨迹的 FP16 discovery 在 RTX 3060 上的最大 allocated VRAM 为 `7.592 GiB`。详见 `results/PREREGISTERED_V4C_DISCOVERY_PROTOCOL.md` 和 `results/V4C_DISCOVERY_FINAL_REPORT.md`。
 
+## v4c Post-Hoc Appendix 诊断
+
+appendix 协议在任何 appendix 轨迹采样前已提交。它复用完全相同的 64 个 round-one prompt，不创建新 gate、不筛选替代 pool，也不允许 residual 拟合。
+
+| 模型 / 设置 | backend | eligible | always commit / rollback / mixed | 精确 A/B 切换 prompt |
+|---|---|---:|---:|---:|
+| Qwen3-4B, T=0.8 | Transformers FP16 | 3/64 | 25 / 24 / 15 | 15/64 |
+| Qwen3-4B, T=1.2 | Transformers FP16 | 9/64 | 18 / 22 / 24 | 23/64 |
+| Qwen3-4B, T=1.5 | Transformers FP16 | 11/64 | 17 / 21 / 26 | 26/64 |
+| `gemma4:e2b`, T=0.8 | Ollama Q4_K_M | 3/64 | 29 / 25 / 10 | 6/64 |
+| `qwen3.5:4b`, T=0.8 | Ollama Q4_K_M | 34/64 | 7 / 1 / 56 | 52/64 |
+
+温度结果收紧了 Qwen3-4B 结论：升温能部分恢复分歧，但两个冻结温度都没有达到原始 30-prompt discovery 门槛。Gemma 作为非 Qwen 部署态对照，仍然表现为低 yield。Qwen3.5 则明显不同：56/64 个 prompt 为 mixed，52/64 个 prompt 确实输出过 A 和 B 两个精确候选，因此 `34/64` eligible 不能只用格式错误或非候选输出解释。
+
+这意味着轨迹对照范式是**模型和采样设置依赖的**，而不是在约 4B 规模上普遍不可用。Qwen3.5 结果仍然只是描述性的，因为 backend、Q4_K_M 量化、native renderer 和模型世代都与 Qwen3-4B FP16 不同。它不改变已完成的 v4c gate，且按协议没有触发确认性 residual 实验。
+
+详见 `results/PREREGISTERED_V4C_APPENDIX_DIAGNOSTICS.md` 和 `results/V4C_APPENDIX_DIAGNOSTICS.md`。
+
 在重新生成 discovery manifest 后，可按冻结参数复跑确认性实验：
 
 ```powershell
@@ -349,6 +373,7 @@ python .\src\benchmark_v4_monitoring_cost.py
 - [x] 配对监控成本基准
 - [x] 预注册 Qwen3-4B 冻结 prompt 跨规模复现
 - [x] 预注册 Qwen3-4B 原生 v4c discovery 与 yield gate
+- [x] 冻结的 v4c 温度与 Gemma/Qwen3.5 部署态诊断
 - [x] Hugging Face Spaces 结果浏览器
 
 ## 致谢

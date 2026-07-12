@@ -36,6 +36,12 @@ yield gate. Only 4/192 candidates reached the frozen within-prompt contrast
 interval across three mechanisms, so no confirmatory residual probe was fit.
 The complete 3,072-trajectory report is available in the viewer.
 
+The frozen post-hoc appendix finds temperature and model dependence. Qwen3-4B
+round-one eligibility rises from 3/64 at T=0.8 to 9/64 and 11/64 at T=1.2 and
+T=1.5, still below the original threshold. At T=0.8, `gemma4:e2b` yields 3/64
+eligible prompts while `qwen3.5:4b` yields 34/64. These Ollama Q4_K_M controls
+are descriptive and do not alter the completed v4c gate.
+
 For the full code and reproduction scripts, see the GitHub repository:
 
 <https://github.com/sunnyspot114514/precommit-lens>

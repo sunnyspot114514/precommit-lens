@@ -21,6 +21,7 @@ PreCommitLens 是一个轻量化 Jacobian-lens 复现实验，也是一个面向
 - 预注册的 v4 轨迹实验已经完成：34 个固定 prompt、1,088 条全新轨迹。9/9 个 test prompt 都保持轨迹分歧，但 residual 新增价值门槛失败。checkpoint 8 的 layer-18 residual AUC 为 `0.823`，可见前缀 TF-IDF 为 `0.817`；配对优势只有 `+0.006 [0.000, 0.017]`，低于冻结的 `+0.03` 门槛。详见 `results/trajectory_v4_confirmatory/Qwen__Qwen3-0.6B/V4_CONFIRMATORY_RESULTS.md`。
 - 预注册的 Qwen3-4B v4b 跨规模复现已经完成，并严格复用同一批冻结 prompt。只有 `2/34` 个 prompt 仍为 mixed，test 中仅 `1/9`，因此 probe 新增价值 gate 为 **inconclusive**。详见 `v4b_cross_scale_report.md`。
 - 预注册的 Qwen3-4B 原生 v4c discovery 也已完成。三种冻结机制的 192 个候选中只有 4 个进入 within-prompt 分歧区间，因此结果为 **DISCOVERY YIELD FAIL**，没有运行确认性 residual probe。详见 `v4c_discovery_report.md`。
+- 冻结的 post-hoc appendix 已完成。Qwen3-4B 的 eligible 数随温度从 `3/64` 升至 `9/64` 和 `11/64`，但仍低于原 gate；`gemma4:e2b` 为 `3/64`，`qwen3.5:4b` 为 `34/64`。这些 Ollama Q4_K_M 结果是描述性对照，不改变 v4c gate。详见 `v4c_appendix_diagnostics.md`。
 
 ## 背景与动机
 
@@ -308,6 +309,7 @@ python .\src\benchmark_v4_monitoring_cost.py
 - [x] 配对监控成本基准
 - [x] Hugging Face Spaces 结果浏览器
 - [x] Qwen3-4B 原生 v4c discovery 与 yield gate
+- [x] v4c 温度与 Gemma/Qwen3.5 部署态诊断
 
 ## 致谢
 

@@ -19,7 +19,10 @@ from run_ollama_trajectory_sampling import (  # noqa: E402
     summarize_prompt_outcomes,
     validate_model_metadata,
 )
-from summarize_v4c_appendix_diagnostics import state_counts  # noqa: E402
+from summarize_v4c_appendix_diagnostics import (  # noqa: E402
+    candidate_prompt_diagnostic,
+    state_counts,
+)
 
 
 class V4CAppendixProtocolTests(unittest.TestCase):
@@ -110,6 +113,21 @@ class V4CAppendixProtocolTests(unittest.TestCase):
         )
         self.assertEqual(eligible, {"b"})
         self.assertEqual(state_counts(summary)["mixed"], 2)
+
+    def test_candidate_prompt_diagnostic_requires_both_exact_outputs(self) -> None:
+        from collections import Counter
+
+        diagnostic = candidate_prompt_diagnostic(
+            {
+                "both": Counter(candidate_a=4, candidate_b=3, other=1),
+                "one": Counter(candidate_a=8, candidate_b=0, other=2),
+                "neither": Counter(candidate_a=0, candidate_b=0, other=16),
+            }
+        )
+        self.assertEqual(diagnostic["both_exact_candidates_prompt_count"], 1)
+        self.assertEqual(diagnostic["one_exact_candidate_prompt_count"], 1)
+        self.assertEqual(diagnostic["no_exact_candidate_prompt_count"], 1)
+        self.assertEqual(diagnostic["prompts_with_other_output_count"], 3)
 
 
 if __name__ == "__main__":

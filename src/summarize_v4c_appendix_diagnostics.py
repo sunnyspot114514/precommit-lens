@@ -100,6 +100,28 @@ def state_counts(prompt_summary: list[dict[str, Any]]) -> dict[str, int]:
     }
 
 
+def candidate_prompt_diagnostic(
+    choices_by_case: dict[str, Counter[str]],
+) -> dict[str, int]:
+    return {
+        "both_exact_candidates_prompt_count": sum(
+            counts["candidate_a"] > 0 and counts["candidate_b"] > 0
+            for counts in choices_by_case.values()
+        ),
+        "one_exact_candidate_prompt_count": sum(
+            (counts["candidate_a"] > 0) ^ (counts["candidate_b"] > 0)
+            for counts in choices_by_case.values()
+        ),
+        "no_exact_candidate_prompt_count": sum(
+            counts["candidate_a"] == 0 and counts["candidate_b"] == 0
+            for counts in choices_by_case.values()
+        ),
+        "prompts_with_other_output_count": sum(
+            counts["other"] > 0 for counts in choices_by_case.values()
+        ),
+    }
+
+
 def summarize_condition(
     cases_path: Path,
     result_dir: Path,
@@ -131,6 +153,7 @@ def summarize_condition(
         for case_id, case in cases.items()
     }
     rows_by_case: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    choices_by_case: dict[str, Counter[str]] = defaultdict(Counter)
     choices: Counter[str] = Counter()
     for trajectory in trajectories:
         case_id = str(trajectory["case_id"])
@@ -138,9 +161,9 @@ def summarize_condition(
             raise ValueError(f"{condition_id}: unknown case id {case_id}")
         rows_by_case[case_id].append(trajectory)
         candidate_a, candidate_b = candidates[case_id]
-        choices[
-            classify_output(str(trajectory["output"]), candidate_a, candidate_b)
-        ] += 1
+        choice = classify_output(str(trajectory["output"]), candidate_a, candidate_b)
+        choices[choice] += 1
+        choices_by_case[case_id][choice] += 1
 
     by_risk: dict[str, dict[str, Any]] = defaultdict(
         lambda: {
@@ -213,6 +236,7 @@ def summarize_condition(
             "other_count": choices["other"],
             "exact_candidate_count": exact,
             "exact_candidate_rate": exact / len(trajectories),
+            **candidate_prompt_diagnostic(choices_by_case),
         },
         "by_risk": risk_payload,
         "cost": {
@@ -259,8 +283,8 @@ def build_report(payload: dict[str, Any]) -> str:
         "model. The original T=0.8 run is reused; T=1.2 and T=1.5 use fresh seeds.",
         "",
         "| temperature | seed start | eligible | always C / R / mixed | "
-        "candidate match | tok/s |",
-        "|---:|---:|---:|---:|---:|---:|",
+        "candidate match | A/B-switch prompts | tok/s |",
+        "|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in temperature_rows:
         choice = row["candidate_choice"]
@@ -269,6 +293,7 @@ def build_report(payload: dict[str, Any]) -> str:
             f"{row['eligible_prompt_count']}/64 | {format_states(row['states'])} | "
             f"{choice['exact_candidate_count']}/1024 "
             f"({choice['exact_candidate_rate']:.1%}) | "
+            f"{choice['both_exact_candidates_prompt_count']}/64 | "
             f"{row['cost']['tokens_per_second']:.3f} |"
         )
 
@@ -281,8 +306,8 @@ def build_report(payload: dict[str, Any]) -> str:
             "They are descriptive model controls, not an unconfounded FP16 scale curve.",
             "",
             "| model | role | digest | eligible | always C / R / mixed | "
-            "candidate match | tok/s |",
-            "|---|---|---|---:|---:|---:|---:|",
+            "candidate match | A/B-switch prompts | tok/s |",
+            "|---|---|---|---:|---:|---:|---:|---:|",
         ]
     )
     roles = {
@@ -297,6 +322,7 @@ def build_report(payload: dict[str, Any]) -> str:
             f"{row['eligible_prompt_count']}/64 | {format_states(row['states'])} | "
             f"{choice['exact_candidate_count']}/1024 "
             f"({choice['exact_candidate_rate']:.1%}) | "
+            f"{choice['both_exact_candidates_prompt_count']}/64 | "
             f"{row['cost']['tokens_per_second']:.3f} |"
         )
 
@@ -335,6 +361,13 @@ def build_report(payload: dict[str, Any]) -> str:
             f"`{deployment_rows[0]['eligible_prompt_count']}/64` eligible prompts for "
             f"Gemma and `{deployment_rows[1]['eligible_prompt_count']}/64` for Qwen3.5. "
             "These counts describe the frozen deployments only.",
+            "",
+            "A post-hoc output-fidelity audit finds both exact candidate A and B in "
+            f"`{deployment_rows[0]['candidate_choice']['both_exact_candidates_prompt_count']}/64` "
+            f"Gemma prompts and "
+            f"`{deployment_rows[1]['candidate_choice']['both_exact_candidates_prompt_count']}/64` "
+            "Qwen3.5 prompts. The Qwen3.5 contrast therefore cannot be explained only by "
+            "its non-candidate outputs.",
             "",
             "No appendix result changes the v4c `DISCOVERY YIELD FAIL`. Temperature, "
             "backend, quantization, native rendering, and model generation prevent a "
