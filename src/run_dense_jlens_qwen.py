@@ -103,6 +103,7 @@ def choose_dtype(name: str, device: torch.device) -> torch.dtype:
 def get_layers(model: torch.nn.Module) -> list[torch.nn.Module]:
     candidates = [
         ("model", "layers"),
+        ("model", "language_model", "layers"),
         ("language_model", "model", "layers"),
         ("language_model", "layers"),
     ]
@@ -122,9 +123,23 @@ def get_layers(model: torch.nn.Module) -> list[torch.nn.Module]:
 def get_core_model(model: torch.nn.Module) -> torch.nn.Module:
     if hasattr(model, "model") and hasattr(model.model, "layers"):
         return model.model
+    if hasattr(model, "model") and hasattr(model.model, "language_model"):
+        language_model = model.model.language_model
+        if hasattr(language_model, "layers"):
+            return language_model
     if hasattr(model, "language_model") and hasattr(model.language_model, "model"):
         return model.language_model.model
     raise AttributeError("Could not locate core transformer model.")
+
+
+def get_hidden_size(config: Any) -> int:
+    hidden_size = int(
+        getattr(config, "hidden_size", 0)
+        or getattr(getattr(config, "text_config", None), "hidden_size", 0)
+    )
+    if hidden_size <= 0:
+        raise ValueError("Could not determine the text hidden size from model config.")
+    return hidden_size
 
 
 def final_norm(model: torch.nn.Module, hidden: torch.Tensor) -> torch.Tensor:
@@ -574,7 +589,7 @@ def main() -> None:
 
     n_layers = len(get_layers(model))
     layers = select_layers(args.layers, n_layers)
-    d_model = int(getattr(config, "hidden_size", 0) or getattr(getattr(config, "text_config", None), "hidden_size", 0))
+    d_model = get_hidden_size(config)
     print(f"Loaded model: n_layers={n_layers} d_model={d_model} layers={layers}", flush=True)
 
     t0 = time.perf_counter()

@@ -20,7 +20,13 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-from run_dense_jlens_qwen import apply_chat_template, choose_dtype, get_layers, safe_name  # noqa: E402
+from run_dense_jlens_qwen import (  # noqa: E402
+    apply_chat_template,
+    choose_dtype,
+    get_hidden_size,
+    get_layers,
+    safe_name,
+)
 from runtime_validators import validate_runtime_output  # noqa: E402
 
 
@@ -238,7 +244,7 @@ def generate_one(
     if not capture_checkpoints:
         return record, None, None, None
 
-    d_model = int(model.config.hidden_size)
+    d_model = get_hidden_size(model.config)
     features = np.full((len(checkpoints), len(layers), d_model), np.nan, dtype=np.float16)
     stats = np.full((len(checkpoints), len(STAT_NAMES)), np.nan, dtype=np.float32)
     valid = np.zeros(len(checkpoints), dtype=np.bool_)
