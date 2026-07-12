@@ -683,6 +683,7 @@
       <span class="badge">Qwen/Qwen3-4B trajectory v4b</span>
       <span class="badge">Qwen3-4B-native discovery v4c</span>
       <span class="badge">Gemma E2B / Qwen3.5 appendix</span>
+      <span class="badge">Qwen3.5-4B confirmatory v4d</span>
       <span class="badge">28 layers</span>
       <span class="badge">1024 x 1024 dense Jacobians</span>
       <span class="badge">Static precomputed results</span>
@@ -757,7 +758,7 @@
       <div class="panel-head">
         <div>
           <h2>Appendix: temperature and deployment sensitivity</h2>
-          <p class="v4-headline">Four frozen post-hoc conditions, no new gate, and no residual follow-up.</p>
+          <p class="v4-headline">Four frozen post-hoc conditions with no change to the completed v4c gate.</p>
         </div>
         <span class="badge">Appendix: COMPLETE</span>
       </div>
@@ -770,6 +771,29 @@
           <div class="v4-metric"><span>Gemma E2B</span><strong>3 / 64 eligible</strong></div>
           <div class="v4-metric"><span>Qwen3.5-4B</span><strong>34 / 64 eligible</strong></div>
           <div class="v4-metric"><span>Qwen3.5 A/B switch</span><strong>52 / 64 prompts</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel v4-summary">
+      <div class="panel-head">
+        <div>
+          <h2>Final v4d: Qwen3.5-4B FP16 accessibility</h2>
+          <p class="v4-headline">A pre-registered deployment transfer followed by a 1,056-trajectory confirmatory run.</p>
+        </div>
+        <span class="badge gate-fail">Primary gate: FAIL</span>
+      </div>
+      <div class="panel-body">
+        <p class="v4-headline">
+          Benchmark contrast survives the move from Ollama Q4_K_M to Transformers FP16, but every early residual and visible-prefix method remains exactly at chance. At checkpoints 0-16, compliant and violating trajectories have identical visible prefixes and identical captured residual states within each evaluable prompt.
+        </p>
+        <div class="v4-metrics">
+          <div class="v4-metric"><span>FP16 stage-one yield</span><strong>36 / 64 eligible</strong></div>
+          <div class="v4-metric"><span>Confirmatory data</span><strong>1,056 trajectories / 33 prompts</strong></div>
+          <div class="v4-metric"><span>Fresh test contrast</span><strong>8 / 8 prompts, 3 risks</strong></div>
+          <div class="v4-metric"><span>Primary AUC curve</span><strong>0.500 for every method</strong></div>
+          <div class="v4-metric"><span>Capture cost</span><strong>1.005x plain generation</strong></div>
+          <div class="v4-metric"><span>Stopping boundary</span><strong>No v4e</strong></div>
         </div>
       </div>
     </section>
@@ -873,6 +897,7 @@
     const densePath = "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/dense_jlens_results.json";
     const pairPath = "results/dense_jlens_qwen_fulllayers_4fit/Qwen__Qwen3-0.6B/paired_delta_summary.json";
     const reports = [
+      { label: "v4d Final", path: "v4d_final_report.md" },
       { label: "v4c Appendix", path: "v4c_appendix_diagnostics.md" },
       { label: "v4c Discovery", path: "v4c_discovery_report.md" },
       { label: "v4b Cross-Scale", path: "v4b_cross_scale_report.md" },

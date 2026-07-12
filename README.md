@@ -24,6 +24,7 @@ This project is not a full reproduction of Anthropic's Global Workspace result. 
 - The pre-registered Qwen3-4B v4b replication is complete on the same frozen prompts. Contrast does not transfer: only `2/34` prompts remain mixed, including `1/9` test prompts from one risk, so the accessibility gate is **inconclusive** before probe comparison. See `results/V4_V4B_CROSS_SCALE_REPORT.md`.
 - The pre-registered 4B-native v4c discovery is also complete. Three frozen mechanisms yielded only `3/64`, `1/64`, and `0/64` eligible prompts, so the final gate is **DISCOVERY YIELD FAIL** and no confirmatory residual probe was fit. See `results/V4C_DISCOVERY_FINAL_REPORT.md`.
 - The frozen post-hoc appendix is complete. On Qwen3-4B, eligible round-one prompts rise from `3/64` at T=0.8 to `9/64` at T=1.2 and `11/64` at T=1.5, still below the original 30-prompt gate. At T=0.8, Ollama Q4_K_M controls yield `3/64` for `gemma4:e2b` and `34/64` for `qwen3.5:4b`. See `results/V4C_APPENDIX_DIAGNOSTICS.md`.
+- The final pre-registered v4d experiment is complete on `Qwen/Qwen3.5-4B` FP16. Stage 1 preserves high trajectory contrast (`36/64` eligible), enabling a 33-prompt confirmatory run with 1,056 fresh trajectories. All splits remain mixed, but residual, TF-IDF, next-token, and judge AUC are exactly `0.500` at every primary checkpoint, so the residual-accessibility gate **FAILS**. See `results/V4D_FINAL_REPORT.md`.
 
 ## Motivation
 
@@ -49,11 +50,14 @@ configs/
   trajectory_confirmatory_v4b.yaml
   trajectory_discovery_v4c_manifest.yaml
   v4c_appendix_diagnostics.yaml
+  trajectory_v4d.yaml
+  trajectory_confirmatory_v4d.yaml
 
 data/prompt_sets/
   heldout_templates_v3.jsonl         # 960-case held-out-template corpus
   trajectory_confirmatory_v4.jsonl   # 34 frozen trajectory prompts
   trajectory_candidates_v4c_round*.jsonl
+  trajectory_confirmatory_v4d.jsonl  # 33 frozen Qwen3.5 prompts
 
 src/
   run_dense_jlens_qwen.py            # Full dense Jacobian-lens runner
@@ -70,6 +74,10 @@ src/
   summarize_v4c_discovery.py         # Final v4c integrity and yield report
   run_ollama_trajectory_sampling.py  # Digest-locked deployment-state sampler
   summarize_v4c_appendix_diagnostics.py
+  evaluate_v4d_stage1.py             # Frozen FP16 transfer gate
+  freeze_v4d_confirmatory.py         # Grouped Qwen3.5 split freezer
+  analyze_v4d_prelanding_identity.py # Post-hoc identity diagnostic
+  summarize_v4d.py                   # Final cross-stage report
 
 results/
   HELDOUT_TEMPLATE_V3_REPORT.md
@@ -78,9 +86,12 @@ results/
   PREREGISTERED_V4B_CROSS_SCALE_PROTOCOL.md
   PREREGISTERED_V4C_DISCOVERY_PROTOCOL.md
   PREREGISTERED_V4C_APPENDIX_DIAGNOSTICS.md
+  PREREGISTERED_V4D_PROTOCOL.md
+  PREREGISTERED_V4D_CONFIRMATORY_PROTOCOL.md
   V4_V4B_CROSS_SCALE_REPORT.md
   V4C_DISCOVERY_FINAL_REPORT.md
   V4C_APPENDIX_DIAGNOSTICS.md
+  V4D_FINAL_REPORT.md
   TRAJECTORY_V4_DISCOVERY_REPORT.md
   QWEN3_DENSE_JLENS_INTERPRETATION.md
   dense_jlens_qwen_fulllayers_4fit/
@@ -318,6 +329,32 @@ This means the trajectory-contrast paradigm is **model- and sampling-dependent**
 
 See `results/PREREGISTERED_V4C_APPENDIX_DIAGNOSTICS.md` and `results/V4C_APPENDIX_DIAGNOSTICS.md`.
 
+## Final Qwen3.5-4B v4d Result
+
+The appendix unexpectedly identified a viable 4B trajectory population in the `qwen3.5:4b` Ollama deployment. v4d therefore froze a final two-stage test before touching the unquantized Hugging Face checkpoint. Stage 1 repeated the same 64 prompts with `Qwen/Qwen3.5-4B` revision `851bf6e...`, FP16 Transformers, and 16 fresh seeds per prompt.
+
+| deployment | eligible | mixed | exact candidate outputs | exact A/B-switch prompts |
+|---|---:|---:|---:|---:|
+| Ollama Q4_K_M | 34/64 | 56/64 | 962/1,024 | 52/64 |
+| Transformers FP16 | 36/64 | 55/64 | 952/1,024 | 53/64 |
+
+The frozen transfer gate passed. It selected 33 prompts from 22 template families and committed a grouped 17/8/8 train/validation/test split before confirmatory sampling. All 33 prompts remained mixed under 32 new seeds, so the accessibility comparison is identified rather than yield-inconclusive.
+
+| checkpoint | prompts | risks | residual L21 | TF-IDF | next-token | judge | residual delta |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2 | 8 | 3 | 0.500 | 0.500 | 0.500 | 0.500 | +0.000 |
+| 4 | 8 | 3 | 0.500 | 0.500 | 0.500 | 0.500 | +0.000 |
+| 6 | 5 | 2 | 0.500 | 0.500 | 0.500 | 0.500 | +0.000 |
+| 8 | 3 | 1 | 0.500 | 0.500 | 0.500 | 0.500 | +0.000 |
+| 10 | 3 | 1 | 0.500 | 0.500 | 0.500 | 0.500 | +0.000 |
+| 12 | 3 | 1 | 0.500 | 0.500 | 0.500 | 0.500 | +0.000 |
+
+The gate **FAILS** with no winning checkpoint. This exact chance curve is not a fitting failure: at checkpoints 0-16, every evaluable prompt has one visible prefix and zero within-prompt residual span at all captured layers. In the test set, all 1,014 early-spoiler/fake-commit cross-label pairs first diverge exactly at policy landing. The 714 hidden-fields pairs diverge two tokens earlier, but that narrow window falls between frozen checkpoints 16 and 24; only two prompts from one risk remain evaluable at checkpoint 24. No intermediate checkpoint was added post hoc.
+
+Six-layer capture costs `1.005x` plain generation (95% paired CI `0.953-1.062`, 16 pairs). The same-model judge costs `231.2` ms per unique prefix and remains at chance. v4d therefore finds abundant outcome stochasticity without an operationally usable signal at the frozen early checkpoints. Per the stopping boundary, no v4e or pre-submission scale curve is derived.
+
+See `results/PREREGISTERED_V4D_PROTOCOL.md`, `results/PREREGISTERED_V4D_CONFIRMATORY_PROTOCOL.md`, and `results/V4D_FINAL_REPORT.md`.
+
 Re-run the frozen confirmation after regenerating the discovery manifest:
 
 ```powershell
@@ -376,6 +413,8 @@ The repository includes the deployed `space_static/` bundle and a minimal `app.p
 - [x] Pre-registered Qwen3-4B frozen-prompt cross-scale replication
 - [x] Pre-registered Qwen3-4B-native v4c discovery and yield gate
 - [x] Frozen v4c temperature and Gemma/Qwen3.5 deployment diagnostics
+- [x] Pre-registered Qwen3.5-4B FP16 transfer and v4d confirmation
+- [x] Frozen v4d stopping boundary; experimental development complete
 - [x] Hugging Face Spaces result browser
 
 ## Acknowledgements
