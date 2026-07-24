@@ -105,9 +105,13 @@ results/
 
 当前主实验拟合的是局部 dense Jacobian lens：
 
-```text
-J_l = d(final_hidden[last_token]) / d(layer_hidden_l[last_token])
-```
+$$
+\mathbf{J}_{\ell}
+=
+\frac{\partial \mathbf{h}_{L,T}}{\partial \mathbf{h}_{\ell,T}},
+$$
+
+其中 $T$ 表示最后一个 token 位置，$\ell$ 表示源层，$L$ 表示最终层。
 
 对于 `Qwen/Qwen3-0.6B`，每层会得到一个 `1024 x 1024` dense matrix。当前版本覆盖全部 28 层，并使用 4 个中性 prompt 做平均。
 
@@ -377,7 +381,14 @@ python .\src\benchmark_v4_monitoring_cost.py
 PreCommitLens 是一个诊断框架，不是模型认知的完整解码器，也不能替代运行时验证。仓库中的证据应在以下边界内解释：
 
 - **Dense J-lens 是局部且经过 prompt 平均的。** 当前主实现估计同一位置的 Jacobian：
-  `J_l = d h_(L,T) / d h_(l,T)`，并在 fitting prompts 上取平均。它没有实现完整 Global Workspace 研究中的 future-summed、cross-position J-space。
+
+  $$
+  \mathbf{J}_{\ell}
+  =
+  \frac{\partial \mathbf{h}_{L,T}}{\partial \mathbf{h}_{\ell,T}}.
+  $$
+
+  随后在 fitting prompts 上对该 Jacobian 取平均。它没有实现完整 Global Workspace 研究中的 future-summed、cross-position J-space。
 - **Jacobian 是一阶敏感度测量。** 它描述的是估计所用激活状态附近的模型行为，不能保证对大幅干预、远离拟合分布的状态、不同 prompt 分布或其他模型 checkpoint 仍然准确。
 - **Probe 准确率只能证明可解码性，不能证明因果使用。** Residual probe 成功并不说明模型以 probe 所使用的形式表示标签，也不说明该方向唯一或对应单个语义神经元。模型表征可能是分布式、纠缠且依赖坐标基的。
 - **敏感度不等于完整机制。** `J_l`、受监控 token 的 rank 和 probe 权重都不能单独识别完整推理算法或计算回路。结果会依赖所选层、token 位置、拟合语料、标签定义、正则化、渲染器和评测协议。
