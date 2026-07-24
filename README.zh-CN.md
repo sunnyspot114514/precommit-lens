@@ -372,6 +372,21 @@ python .\src\analyze_v4_trajectories.py `
 python .\src\benchmark_v4_monitoring_cost.py
 ```
 
+## 局限性
+
+PreCommitLens 是一个诊断框架，不是模型认知的完整解码器，也不能替代运行时验证。仓库中的证据应在以下边界内解释：
+
+- **Dense J-lens 是局部且经过 prompt 平均的。** 当前主实现估计同一位置的 Jacobian：
+  `J_l = d h_(L,T) / d h_(l,T)`，并在 fitting prompts 上取平均。它没有实现完整 Global Workspace 研究中的 future-summed、cross-position J-space。
+- **Jacobian 是一阶敏感度测量。** 它描述的是估计所用激活状态附近的模型行为，不能保证对大幅干预、远离拟合分布的状态、不同 prompt 分布或其他模型 checkpoint 仍然准确。
+- **Probe 准确率只能证明可解码性，不能证明因果使用。** Residual probe 成功并不说明模型以 probe 所使用的形式表示标签，也不说明该方向唯一或对应单个语义神经元。模型表征可能是分布式、纠缠且依赖坐标基的。
+- **敏感度不等于完整机制。** `J_l`、受监控 token 的 rank 和 probe 权重都不能单独识别完整推理算法或计算回路。结果会依赖所选层、token 位置、拟合语料、标签定义、正则化、渲染器和评测协议。
+- **当前读出方向没有被验证为可靠的控制抓手。** 在配对 suppress-vs-sham 实验中，抑制所选方向相对同范数 sham 干预增加了策略违规。这否定了简单的安全 steering 解释，也说明离分布或纠缠的激活编辑可能带来风险。
+- **实证范围有限。** 确认性的内部状态结果覆盖 Qwen3-0.6B 和 Qwen3.5-4B，并在 Qwen3-4B 与量化 Gemma 部署上进行了可行性诊断。任务是合成的、短程的英文治理场景，不能据此外推到自然部署流量、长程推理、欺骗性对齐或其他模型家族。
+- **可见信息始终是必要 baseline。** Prompt 泄漏、构造标签、缺失同一 prompt 内的结局对比度，以及在轨迹尚未分叉前取样，都可能制造误导性的内部监控结果。只有通过四道 validity gate 后，才能讨论 readout 的运行时价值。
+
+本项目适合用于假设生成和 pre-commit 监控研究。即使内部 readout 表现出预测性，显式 schema、语义 validator、事务化状态变更和 rollback 仍然不可替代。
+
 ## Hugging Face Spaces 静态预览
 
 免费的 Hugging Face Space 已作为静态结果浏览器部署，不会在线拟合模型或占用 GPU。当前它可以：

@@ -374,6 +374,21 @@ python .\src\analyze_v4_trajectories.py `
 python .\src\benchmark_v4_monitoring_cost.py
 ```
 
+## Limitations
+
+PreCommitLens is a diagnostic framework, not a complete decoder of model cognition or a replacement for runtime validation. Its evidence should be interpreted within the following boundaries:
+
+- **The dense J-lens is local and prompt-averaged.** The main implementation estimates the same-position Jacobian
+  `J_l = d h_(L,T) / d h_(l,T)` and averages it over fitting prompts. It does not implement the future-summed, cross-position J-space used in the full Global Workspace study.
+- **A Jacobian is a first-order sensitivity measurement.** It describes the model near the activation states on which it was estimated. It need not remain accurate for large interventions, distant states, different prompt distributions, or other model checkpoints.
+- **Probe accuracy establishes decodability, not causal use.** A successful residual probe does not show that the model represents the label in the probe's form, that the direction is unique, or that it corresponds to an individual semantic neuron. Representations may be distributed, entangled, and basis-dependent.
+- **Sensitivity is not a complete mechanism.** Neither `J_l`, watched-token ranks, nor probe weights identify a full reasoning algorithm or computational circuit. The results depend on the selected layer, token position, fitting corpus, label definition, regularization, renderer, and evaluation protocol.
+- **The tested readout directions are not validated control handles.** In the paired suppress-vs-sham experiments, suppressing the selected directions increased policy violations relative to same-norm sham interventions. This rejects a simple safe-steering interpretation and illustrates the risk of off-distribution or entangled activation edits.
+- **The empirical scope is narrow.** Confirmatory internal-state results cover Qwen3-0.6B and Qwen3.5-4B, with feasibility diagnostics on Qwen3-4B and a quantized Gemma deployment. The tasks are synthetic, short-horizon, English-language governance scenarios and do not establish behavior on natural deployment traffic, long reasoning traces, deceptive alignment, or other model families.
+- **Visible information remains a required baseline.** Prompt leakage, constructed labels, missing within-prompt outcome contrast, and observations taken before trajectories diverge can all create misleading internal-monitoring results. The four validity gates are required before assigning operational value to a readout.
+
+The intended use is hypothesis generation and pre-commit monitoring research. Explicit schemas, semantic validators, transactional state changes, and rollback remain necessary even when an internal readout appears predictive.
+
 ## Static Hugging Face Spaces Preview
 
 The free static Hugging Face Space is a result browser, not a GPU-heavy online fitter. It currently:
