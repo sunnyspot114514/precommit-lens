@@ -107,11 +107,9 @@ Large generated artifacts such as `.npz` lens files, model weights, and vendor p
 
 The current main experiment fits a dense local Jacobian lens:
 
-$$
-\mathbf{J}_{\ell}
-=
-\frac{\partial \mathbf{h}_{L,T}}{\partial \mathbf{h}_{\ell,T}},
-$$
+```math
+\mathbf{J}_{\ell} = \frac{\partial \mathbf{h}_{L,T}}{\partial \mathbf{h}_{\ell,T}}
+```
 
 where $T$ is the last token position, $\ell$ is the source layer, and $L$ is the final layer.
 
@@ -355,9 +353,18 @@ The frozen transfer gate passed. It selected 33 prompts from 22 template familie
 
 The gate **FAILS** with no winning checkpoint. This exact chance curve is not a fitting failure: at checkpoints 0-16, every evaluable prompt has one visible prefix and zero within-prompt residual span at all captured layers. In the test set, all 1,014 early-spoiler/fake-commit cross-label pairs first diverge exactly at policy landing. The 714 hidden-fields pairs diverge two tokens earlier, but that narrow window falls between frozen checkpoints 16 and 24; only two prompts from one risk remain evaluable at checkpoint 24. No intermediate checkpoint was added post hoc.
 
-Six-layer capture costs `1.005x` plain generation (95% paired CI `0.953-1.062`, 16 pairs). The same-model judge costs `231.2` ms per unique prefix and remains at chance. v4d therefore finds abundant outcome stochasticity without an operationally usable signal at the frozen early checkpoints. Per the stopping boundary, no v4e or pre-submission scale curve is derived.
+Runtime cost:
 
-See `results/PREREGISTERED_V4D_PROTOCOL.md`, `results/PREREGISTERED_V4D_CONFIRMATORY_PROTOCOL.md`, and `results/V4D_FINAL_REPORT.md`.
+- Six-layer residual capture: **1.005x** plain generation (95% paired CI: **0.953-1.062**, 16 pairs).
+- Same-model judge: **231.2 ms** per unique prefix; performance remained at chance.
+
+v4d therefore finds abundant outcome stochasticity without an operationally usable signal at the frozen early checkpoints.
+
+v4d artifacts:
+
+- [Preregistered protocol](results/PREREGISTERED_V4D_PROTOCOL.md)
+- [Confirmatory protocol](results/PREREGISTERED_V4D_CONFIRMATORY_PROTOCOL.md)
+- [Final report](results/V4D_FINAL_REPORT.md)
 
 Re-run the frozen confirmation after regenerating the discovery manifest:
 
@@ -382,15 +389,7 @@ python .\src\benchmark_v4_monitoring_cost.py
 
 PreCommitLens is a diagnostic framework, not a complete decoder of model cognition or a replacement for runtime validation. Its evidence should be interpreted within the following boundaries:
 
-- **The dense J-lens is local and prompt-averaged.** The main implementation estimates the same-position Jacobian:
-
-  $$
-  \mathbf{J}_{\ell}
-  =
-  \frac{\partial \mathbf{h}_{L,T}}{\partial \mathbf{h}_{\ell,T}}.
-  $$
-
-  It averages this Jacobian over fitting prompts. It does not implement the future-summed, cross-position J-space used in the full Global Workspace study.
+- **The dense J-lens is local and prompt-averaged.** The main implementation estimates the same-position Jacobian defined above and averages it over fitting prompts. It does not implement the future-summed, cross-position J-space used in the full Global Workspace study.
 - **A Jacobian is a first-order sensitivity measurement.** It describes the model near the activation states on which it was estimated. It need not remain accurate for large interventions, distant states, different prompt distributions, or other model checkpoints.
 - **Probe accuracy establishes decodability, not causal use.** A successful residual probe does not show that the model represents the label in the probe's form, that the direction is unique, or that it corresponds to an individual semantic neuron. Representations may be distributed, entangled, and basis-dependent.
 - **Sensitivity is not a complete mechanism.** Neither `J_l`, watched-token ranks, nor probe weights identify a full reasoning algorithm or computational circuit. The results depend on the selected layer, token position, fitting corpus, label definition, regularization, renderer, and evaluation protocol.
